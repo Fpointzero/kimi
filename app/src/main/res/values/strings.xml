@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">kimi</string>
+    <string name="navigation_message">消息</string>
+    <string name="navigation_mine">我的</string>
+    <string name="navigation_nearby">附近</string>
+    <string name="navigation_contact">联系人</string>
+    <string name="user">用户</string>
+    <string name="add_friend">添加好友</string>
+    <string name="hint_ip">请输入对方IP地址</string>
+</resources>

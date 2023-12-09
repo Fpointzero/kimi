@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        tools:ignore="MissingConstraints">
+
+        <EditText
+            android:id="@+id/edtext_test_send"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/btn_connect"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="连接" />
+
+        <Button
+            android:id="@+id/btn_test_server_send"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="服务端发送消息给客户端" />
+
+        <Button
+            android:id="@+id/btn_test_client_send"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="客户端发送消息给服务端" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

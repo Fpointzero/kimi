@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_message"
+        android:icon="@drawable/ic_message_24"
+        android:title="@string/navigation_message" />
+
+    <item
+        android:id="@+id/navigation_contact"
+        android:icon="@drawable/ic_group_24"
+        android:title="@string/navigation_contact" />
+
+    <item
+        android:id="@+id/navigation_nearby"
+        android:icon="@drawable/ic_nearby_24"
+        android:title="@string/navigation_nearby" />
+
+    <item
+        android:id="@+id/navigation_mine"
+        android:icon="@drawable/ic_user_24"
+        android:title="@string/navigation_mine" />
+</menu>

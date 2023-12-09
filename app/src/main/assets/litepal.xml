@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<litepal>
+    <dbname value="kimi"></dbname>
+    <version value="1"></version>
+    <list>
+        <mapping class="xyz.fpointzero.android.data.User"></mapping>
+        <mapping class="xyz.fpointzero.android.data.ChatMessage"></mapping>
+    </list>
+</litepal>

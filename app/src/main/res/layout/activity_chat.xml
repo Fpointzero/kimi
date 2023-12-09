@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@color/whitesmoke"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.ChatActivity">
+
+
+    <xyz.fpointzero.android.layout.TitleChildBar
+        android:id="@+id/activity_chat_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/activity_chat_recyclerview"
+        android:layout_margin="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <LinearLayout
+        android:paddingVertical="10dp"
+        android:paddingHorizontal="10dp"
+        android:background="@color/white"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/inputView"
+            android:paddingHorizontal="5dp"
+            android:background="@drawable/bg_edit"
+            android:hint="输入发送内容"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"/>
+
+        <Button
+            android:visibility="gone"
+            android:layout_marginStart="10dp"
+            android:id="@+id/send"
+            android:background="@drawable/bg_edit"
+            android:text="发送"
+            android:layout_width="80dp"
+            android:layout_height="40dp"/>
+
+        <ImageView
+            android:id="@+id/image"
+            android:layout_marginStart="10dp"
+            android:src="@drawable/ic_chat_image_200"
+            android:layout_width="40dp"
+            android:layout_height="40dp"/>
+
+    </LinearLayout>
+
+
+
+</LinearLayout>
