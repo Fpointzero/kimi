@@ -7,4 +7,10 @@
     <string name="user">用户</string>
     <string name="add_friend">添加好友</string>
     <string name="hint_ip">请输入对方IP地址</string>
+    <string name="form_username">用户名：</string>
+    <string name="form_port">端口：</string>
+    <string name="save">保存</string>
+    <string name="setting">设置</string>
+    <string name="search">搜索</string>
+    <string name="hint_search">请输入搜索内容</string>
 </resources>

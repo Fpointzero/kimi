@@ -25,7 +25,7 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import okio.ByteString;
-import xyz.fpointzero.android.constants.DataType;
+import xyz.fpointzero.android.constants.Type;
 import xyz.fpointzero.android.data.User;
 import xyz.fpointzero.android.utils.data.UserUtil;
 import xyz.fpointzero.android.utils.data.SettingUtil;
@@ -41,6 +41,14 @@ public class MockWebServerManager {
     private ArrayList<MyWebSocket> connectWebSocketList;
 
     private MockWebServerManager() {
+    }
+    
+    public MyWebSocket getServerWS(String userID) {
+        for (int i = 0; i < connectWebSocketList.size(); i++) {
+            if (connectWebSocketList.get(i).getUserID().equals(userID))
+                return connectWebSocketList.get(i);
+        }
+        return null;
     }
 
     public static synchronized MockWebServerManager getInstance() {
@@ -61,7 +69,7 @@ public class MockWebServerManager {
         initMockServer();
     }
 
-    public void stop() throws IOException {
+    public void close() throws IOException {
         mMockWebServer.shutdown();
         mMockWebServer.close();
     }
@@ -71,10 +79,10 @@ public class MockWebServerManager {
             mMockWebServer = new MockWebServer();
             InetAddress ipAddress = InetAddress.getByName("0.0.0.0");
             while (true) {
-                Log.d(TAG, "initMockServer: sleep 1");
-                Thread.sleep(1000);
                 if (SettingUtil.getInstance().getSetting() != null)
                     break;
+                Log.d(TAG, "initMockServer: sleep 1");
+                Thread.sleep(1000);
             }
             port = SettingUtil.getInstance().getSetting().getServerPort();
             connectWebSocketList = new ArrayList<MyWebSocket>();
@@ -129,17 +137,17 @@ public class MockWebServerManager {
                             // 已经是好友
 //                                onWSDataChanged(DataType.DATA_RECEIVE, data);
 //                                MyWebSocketManager.getInstance().onWSDataChanged(DataType.DATA_RECEIVE, data);
-                            if (DataType.DATA_CONNECT == data.getAction()) {
+                            if (Type.DATA_CONNECT == data.getAction()) {
 //                                    onWSDataChanged(DataType.DATA_CONNECT, data);
-                                MyWebSocketManager.getInstance().onWSDataChanged(DataType.DATA_CONNECT, data);
-                                return new MockResponse().setBody(new Message(DataType.DATA_INFO, "已经是好友了请勿重复申请").toString()).setResponseCode(200);
+                                MyWebSocketManager.getInstance().onWSDataChanged(Type.DATA_CONNECT, data);
+                                return new MockResponse().setBody(new Message(Type.DATA_INFO, "已经是好友了请勿重复申请").toString()).setResponseCode(200);
                             }
                         } else {
                             // 不是好友
-                            if (DataType.DATA_CONNECT == data.getAction()) {
+                            if (Type.DATA_CONNECT == data.getAction()) {
 //                                    onWSDataChanged(DataType.DATA_CONNECT, data);
-                                MyWebSocketManager.getInstance().onWSDataChanged(DataType.DATA_CONNECT, data);
-                                return new MockResponse().setBody(new Message(DataType.DATA_INFO, "申请成功").toString()).setResponseCode(200);
+                                MyWebSocketManager.getInstance().onWSDataChanged(Type.DATA_CONNECT, data);
+                                return new MockResponse().setBody(new Message(Type.DATA_INFO, "申请成功").toString()).setResponseCode(200);
                             }
                         }
 
@@ -190,9 +198,11 @@ public class MockWebServerManager {
             try {
                 Message data = JSON.parseObject(text, Message.class);
                 User user = new User(data.getUserID(), data.getIp());
-                if (DataType.DATA_CONNECT == data.getAction()) {
+                if (Type.DATA_CONNECT == data.getAction()) {
                     if (!UserUtil.isInWhiteList(user)) {
-                        MyWebSocketManager.getInstance().onWSDataChanged(DataType.SERVER, data);
+                        MyWebSocketManager.getInstance().onWSDataChanged(Type.SERVER, data);
+                        // 可能被强行覆盖其他人数据（仅仅username和ip）
+                        user.saveOrUpdate("userid = ?", user.getUserID());
 //                        webSocket.close(ErrorType.CONNECT_REFUSE, "连接已拒绝");
                         // 可能有bug
                     }
@@ -221,12 +231,12 @@ public class MockWebServerManager {
                 Message data = JSON.parseObject(text, Message.class);
                 User user = new User(data.getUserID(), data.getIp());
 
-                if (DataType.DATA_PING == data.getAction()) {
-                    final String message = JSON.toJSONString(new Message(DataType.DATA_PING, "pong response"));
+                if (Type.DATA_PING == data.getAction()) {
+                    final String message = JSON.toJSONString(new Message(Type.DATA_PING, "pong response"));
 //                    webSocket.send(message);
                     for (int i = 0; i < connectWebSocketList.size(); i++) {
                         if (connectWebSocketList.get(i).getmWebSocket() == webSocket) {
-                            connectWebSocketList.get(i).sendByEncrypt(new Message(DataType.DATA_PING, "ping").toString().getBytes(StandardCharsets.UTF_8));
+                            connectWebSocketList.get(i).sendByEncrypt(new Message(Type.DATA_PING, "ping").toString().getBytes(StandardCharsets.UTF_8));
                         }
                     }
 
@@ -234,16 +244,16 @@ public class MockWebServerManager {
                 }
 
                 if (UserUtil.isInWhiteList(user)) {
-                    if (DataType.DATA_PRIVATE == data.getAction()) {
+                    if (Type.DATA_PRIVATE == data.getAction()) {
                         
                         return;
                     }
-                    if (DataType.DATA_GROUP == data.getAction()) {
+                    if (Type.DATA_GROUP == data.getAction()) {
                         // 群聊
                         /** 群里其他人同步信息 */
                         sendToOthers(webSocket, text);
                     }
-                    MyWebSocketManager.getInstance().onWSDataChanged(DataType.SERVER, data);
+                    MyWebSocketManager.getInstance().onWSDataChanged(Type.SERVER, data);
 //                        onWSDataChanged(DataType.DATA_RECEIVE, data);
                 } else {
 

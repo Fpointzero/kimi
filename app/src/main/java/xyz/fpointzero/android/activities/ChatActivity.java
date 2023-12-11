@@ -29,6 +29,8 @@ public class ChatActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         init();
+        
+        // TODO: 检测聊天过程中的数据更新
     }
     
     private void init() {
@@ -37,6 +39,7 @@ public class ChatActivity extends BaseActivity {
             // init data
             Bundle bundle = intent.getExtras();
             String userID = bundle.getString("userID");
+            String username = bundle.getString("username");
             chatMessageList = LitePal.where("sender = ? or receiver = ?", userID, userID).find(ChatMessage.class);
             RecyclerView recyclerView = (RecyclerView) findViewById(R.id.activity_chat_recyclerview);
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -45,7 +48,7 @@ public class ChatActivity extends BaseActivity {
             recyclerView.setAdapter(chatMessageAdapter);
             // init view
             TitleChildBar titleBar = findViewById(R.id.activity_chat_title);
-            titleBar.setTitle(userID);
+            titleBar.setTitle(username);
         } catch (Exception e) {
             Log.e(TAG, "initData: " + e.getMessage(), e);
             finish();

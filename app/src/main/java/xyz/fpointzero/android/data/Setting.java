@@ -11,6 +11,7 @@ import xyz.fpointzero.android.utils.crypto.RSAUtil;
 public class Setting implements Serializable {
     private static final String ALG = "RSA";
     private String userID;
+    private String username;
     private PublicKey publicKey;
     private PrivateKey privateKey;
     private Integer serverPort;
@@ -27,6 +28,8 @@ public class Setting implements Serializable {
                 userID = MD5Util.stringToMD5(RSAUtil.publicKeyToString(keyPair.getPublic()));
             }
         }
+        if (username == null)
+            username = "unkown";
     }
 
     public String getUserID() {
@@ -47,5 +50,13 @@ public class Setting implements Serializable {
 
     public void setServerPort(int serverPort) {
         this.serverPort = serverPort;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

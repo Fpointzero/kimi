@@ -12,8 +12,11 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import xyz.fpointzero.android.constants.Type;
 import xyz.fpointzero.android.network.Callback;
 import xyz.fpointzero.android.network.Message;
+import xyz.fpointzero.android.network.MyWebSocket;
+import xyz.fpointzero.android.network.MyWebSocketManager;
 
 public class MessageUtil {
     private static final String TAG = "MessageUtil";
@@ -57,9 +60,10 @@ public class MessageUtil {
 //        }
 //        return null;
 //    }
+    /*
     public static void sendMessage(String ipAndPort, Message msg, final Callback callback) {
         String url = ipAndPort.contains(":") ? ipAndPort : ipAndPort + ":10808";
-        
+
         OkHttpClient client = new OkHttpClient();
 
         MediaType mediaType = MediaType.parse("application/json");
@@ -89,5 +93,13 @@ public class MessageUtil {
                 callback.onError();
             }
         });
+    }
+*/
+    public static void sendMessage(String ipAndPort, Message msg) {
+        String url = "ws://";
+        url += ipAndPort.contains(":") ? ipAndPort : ipAndPort + ":10808";
+        url += "/webSocket";
+        MyWebSocket myWebSocket = MyWebSocketManager.getInstance().getClientWS(url);
+        myWebSocket.send(msg.toString());
     }
 }

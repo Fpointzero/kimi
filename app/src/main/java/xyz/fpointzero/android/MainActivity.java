@@ -6,11 +6,11 @@ import android.widget.TextView;
 
 import androidx.fragment.app.FragmentTransaction;
 
-import java.util.HashMap;
+import java.io.IOException;
 
 import xyz.fpointzero.android.utils.activity.ActivityUtil;
 import xyz.fpointzero.android.activities.BaseActivity;
-import xyz.fpointzero.android.constants.DataType;
+import xyz.fpointzero.android.constants.Type;
 import xyz.fpointzero.android.fragments.MessageFragment;
 import xyz.fpointzero.android.network.Message;
 import xyz.fpointzero.android.network.MockWebServerManager;
@@ -54,10 +54,12 @@ public class MainActivity extends BaseActivity implements MyWebSocketManager.Web
     @Override
     public void onWebSocketData(int type, Message info) {
         Log.d(TAG, "onWebSocketData: Type: " + type + " Receive data: " + info.toString());
-        if (type == DataType.CLIENT) {
-            
-        } else if (type == DataType.DATA_CONNECT) {
-            DialogUtil.showConnectDialog(MainActivity.this, info);
+        if (type == Type.SERVER) {
+            if (info.getAction() == Type.DATA_CONNECT)
+                DialogUtil.showConnectDialog(MainActivity.this, info);
+        } else if (type == Type.CLIENT) {
+            if (info.getAction() == Type.DATA_CONNECT)
+                DialogUtil.showConnectDialog(MainActivity.this, info);
         }
     }
 
@@ -65,7 +67,12 @@ public class MainActivity extends BaseActivity implements MyWebSocketManager.Web
     protected void onDestroy() {
         super.onDestroy();
         SettingUtil.getInstance().saveSetting(MainActivity.this);
-        MyWebSocketManager.getInstance().closeAll();
+        try {
+            MyWebSocketManager.getInstance().closeAll();
+            MockWebServerManager.getInstance().close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

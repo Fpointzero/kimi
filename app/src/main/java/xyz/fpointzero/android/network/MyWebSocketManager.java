@@ -145,5 +145,7 @@ public class MyWebSocketManager {
         void onWebSocketData(int type, xyz.fpointzero.android.network.Message info);
     }
 
-
+    public ArrayList<MyWebSocket> getmWebSockets() {
+        return mWebSockets;
+    }
 }

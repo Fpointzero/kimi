@@ -43,6 +43,7 @@ public class SettingUtil {
             FileOutputStream out = context.openFileOutput(SETTING_FILE_NAME, Context.MODE_PRIVATE);
             SerializationUtil.serialize(setting, out);
             out.close();
+//            Log.e(TAG, "保存设置");
         } catch (IOException e) {
             Log.e(TAG, "saveSetting: ", e);
         }

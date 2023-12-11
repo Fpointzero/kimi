@@ -8,52 +8,74 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
 
 import xyz.fpointzero.android.R;
 import xyz.fpointzero.android.activities.AddFriendActivity;
+import xyz.fpointzero.android.activities.SettingActivity;
 
-public class TitleBar extends LinearLayout {
+/**
+ * MainActivity TitleBar
+ */
+public class TitleBar extends LinearLayout implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
 
     private ImageButton menuButton;
+    private PopupMenu popupMenu;
+    private TextView title;
 
     public TitleBar(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         LayoutInflater.from(context).inflate(R.layout.title_bar, this, true);
-
+        
+        title = findViewById(R.id.textview_title);
         // 获取菜单按钮的引用
         menuButton = findViewById(R.id.menu_btn);
 
         // 设置菜单按钮的点击事件
-        menuButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 显示菜单
-                PopupMenu popupMenu = new PopupMenu(getContext(), menuButton);
-                popupMenu.getMenuInflater().inflate(R.menu.title_menu, popupMenu.getMenu());
+        menuButton.setOnClickListener(this);
+    }
 
-                // 处理菜单的点击事件
-                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+    @Override
+    public void onClick(View v) {
+        String titleValue = title.getText().toString();
+        // 显示菜单
+        popupMenu = new PopupMenu(getContext(), menuButton);
+        if (titleValue.equals(getResources().getString(R.string.navigation_message)))
+            popupMenu.getMenuInflater().inflate(R.menu.title_menu_contact, popupMenu.getMenu());
+        if (titleValue.equals(getResources().getString(R.string.navigation_contact)))
+            popupMenu.getMenuInflater().inflate(R.menu.title_menu_contact, popupMenu.getMenu());
+        if (titleValue.equals(getResources().getString(R.string.navigation_nearby)))
+            popupMenu.getMenuInflater().inflate(R.menu.title_menu_contact, popupMenu.getMenu());
+        if (titleValue.equals(getResources().getString(R.string.navigation_mine)))
+            popupMenu.getMenuInflater().inflate(R.menu.title_menu_mine, popupMenu.getMenu());
+        // 处理菜单的点击事件
+        popupMenu.setOnMenuItemClickListener(TitleBar.this);
 
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        // 根据菜单项的 ID 进行处理
-                        int itemID = item.getItemId();
-                        if (itemID == R.id.add_friend) {
-//                            Toast.makeText(context, "", Toast.LENGTH_SHORT).show();
-                            context.startActivity(new Intent(context, AddFriendActivity.class));
-                            return true;
-                        }
-                        return false;
-                    }
-                });
+        // 显示菜单
+        popupMenu.show();
+    }
 
-                // 显示菜单
-                popupMenu.show();
-            }
-        });
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        int itemID = item.getItemId();
+        if (itemID == R.id.option_add_friend) {
+            getContext().startActivity(new Intent(getContext(), AddFriendActivity.class));
+            return true;
+        }
+        if (itemID == R.id.option_setting) {
+            getContext().startActivity(new Intent(getContext(), SettingActivity.class));
+            return true;
+        }
+        return false;
+    }
+
+    public void setTitle(String text) {
+        title.setText(text);
+    }
+    public void setTitle(int id) {
+        title.setText(id);
     }
 }

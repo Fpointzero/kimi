@@ -25,6 +25,7 @@
             android:src="@drawable/pic_profile_image_716" />
 
         <TextView
+            android:id="@+id/textview_username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"

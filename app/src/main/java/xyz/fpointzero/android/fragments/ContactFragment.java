@@ -26,13 +26,14 @@ public class ContactFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_contact, container, false);
+        
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-//        contactList = ListUtil.getWhiteList();
+        
         contactList = UserUtil.getWhiteList();
         if (contactAdapter == null) {
             RecyclerView recyclerView = (RecyclerView) requireActivity().findViewById(R.id.recycler_contact);

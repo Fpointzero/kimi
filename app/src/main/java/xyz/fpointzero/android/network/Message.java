@@ -4,9 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.alibaba.fastjson.JSONObject;
 
-import xyz.fpointzero.android.MainActivity;
-import xyz.fpointzero.android.utils.activity.ActivityUtil;
-import xyz.fpointzero.android.constants.DataType;
+import xyz.fpointzero.android.constants.Type;
 import xyz.fpointzero.android.utils.data.SettingUtil;
 import xyz.fpointzero.android.utils.crypto.RSAUtil;
 import xyz.fpointzero.android.utils.network.NetworkUtil;
@@ -14,6 +12,7 @@ import xyz.fpointzero.android.utils.network.NetworkUtil;
 public class Message {
     private int action;
     private String userID;
+    private String username;
     private String ip;
     //    private String publicKey;
     private String msg;
@@ -25,6 +24,7 @@ public class Message {
     public Message(int action, String msg) {
         this.action = action;
         this.setUserID(SettingUtil.getInstance().getSetting().getUserID());
+        this.username = SettingUtil.getInstance().getSetting().getUsername();
         this.ip = NetworkUtil.getDeviceIPv4Address();
 //        this.setPublicKey(SettingUtil.getInstance().getSetting().getPublicKey());
         this.setMsg(msg);
@@ -106,7 +106,7 @@ public class Message {
 
     public static Message getConnectMessage() {
         Message connectMsg = new Message();
-        connectMsg.setAction(DataType.DATA_CONNECT);
+        connectMsg.setAction(Type.DATA_CONNECT);
         connectMsg.setUserID(SettingUtil.getInstance().getSetting().getUserID());
         connectMsg.setMsg(RSAUtil.publicKeyToString(SettingUtil.getInstance().getSetting().getPublicKey()));
 //        this.setPublicKey(SettingUtil.getInstance().getSetting().getPublicKey());

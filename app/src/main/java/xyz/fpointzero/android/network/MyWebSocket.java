@@ -20,8 +20,9 @@ import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import okio.ByteString;
-import xyz.fpointzero.android.constants.DataType;
+import xyz.fpointzero.android.constants.Type;
 import xyz.fpointzero.android.constants.ErrorType;
+import xyz.fpointzero.android.utils.crypto.MD5Util;
 import xyz.fpointzero.android.utils.data.SettingUtil;
 import xyz.fpointzero.android.utils.crypto.RSAUtil;
 
@@ -100,7 +101,7 @@ public class MyWebSocket {
         @Override
         public boolean handleMessage(@NonNull android.os.Message msg) {
             if (msg.what != 10) return false;
-            final String message = new xyz.fpointzero.android.network.Message(DataType.DATA_PING, "ping").toString();
+            final String message = new xyz.fpointzero.android.network.Message(Type.DATA_PING, "ping").toString();
             if (isReceivePong) {
                 try {
                     sendByEncrypt(message.getBytes());
@@ -159,12 +160,12 @@ public class MyWebSocket {
             Log.e(TAG + ":Debug", "客户端收到消息:" + text);
             try {
                 xyz.fpointzero.android.network.Message data = JSON.parseObject(text, xyz.fpointzero.android.network.Message.class);
-                if (DataType.DATA_CONNECT == data.getAction()) {
+                if (Type.DATA_CONNECT == data.getAction()) {
                     //主动发送心跳包
                     isReceivePong = true;
                     heartHandler.sendEmptyMessage(10);
                     publicKey = RSAUtil.publicKeyFromString(data.getMsg());
-                    MyWebSocketManager.getInstance().onWSDataChanged(DataType.CLIENT, data);
+                    MyWebSocketManager.getInstance().onWSDataChanged(Type.CLIENT, data);
                     return;
                 }
             } catch (Exception e) {
@@ -182,12 +183,12 @@ public class MyWebSocket {
                 
                 Message data = JSON.parseObject(text, Message.class);
                 
-                if (DataType.DATA_PING == data.getAction()) {
+                if (Type.DATA_PING == data.getAction()) {
                     isReceivePong = true;
                     return;
                 }
                 
-                if (DataType.DATA_ERROR == data.getAction()) {
+                if (Type.DATA_ERROR == data.getAction()) {
                     webSocket.close(ErrorType.CONNECT_REFUSE, "error");
                     return;
                 }
@@ -204,7 +205,7 @@ public class MyWebSocket {
             mWebSocket = webSocket;
 
             // 交换公钥
-            final String msg = JSON.toJSONString(new xyz.fpointzero.android.network.Message(DataType.DATA_CONNECT, RSAUtil.publicKeyToString(SettingUtil.getInstance().getSetting().getPublicKey())));
+            final String msg = JSON.toJSONString(new xyz.fpointzero.android.network.Message(Type.DATA_CONNECT, RSAUtil.publicKeyToString(SettingUtil.getInstance().getSetting().getPublicKey())));
             send(msg);
             Log.d(TAG, "onOpen: " + msg);
         }
@@ -234,5 +235,11 @@ public class MyWebSocket {
 
     public String getWsURL() {
         return wsURL;
+    }
+    
+    public String getUserID() {
+        if (publicKey != null)
+            return MD5Util.stringToMD5(RSAUtil.publicKeyToString(publicKey));
+        return null;
     }
 }

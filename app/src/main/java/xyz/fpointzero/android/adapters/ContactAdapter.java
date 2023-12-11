@@ -48,6 +48,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
                 Intent intent = new Intent(context, ChatActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("userID", user.getUserID());
+                bundle.putString("username", user.getUsername());
                 intent.putExtras(bundle);
                 context.startActivity(intent);
                 Toast.makeText(context, "click " + user.getUserID(), Toast.LENGTH_SHORT).show();
