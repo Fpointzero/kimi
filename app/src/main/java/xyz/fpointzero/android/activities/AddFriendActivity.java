@@ -2,13 +2,17 @@ package xyz.fpointzero.android.activities;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.appcompat.widget.Toolbar;
+
 import xyz.fpointzero.android.R;
 import xyz.fpointzero.android.constants.Type;
+import xyz.fpointzero.android.layout.TitleChildBar;
 import xyz.fpointzero.android.network.Callback;
 import xyz.fpointzero.android.network.Message;
 import xyz.fpointzero.android.utils.activity.ActivityUtil;
@@ -19,12 +23,17 @@ public class AddFriendActivity extends BaseActivity implements View.OnClickListe
     public final static String TAG = "AddFriendActivity";
     private Button btnAddFriend;
     private EditText edtextAddIp;
+    private TitleChildBar titleBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_friend);
         ActivityUtil.getInstance().getMap().put(TAG, this);
+        
+        Toolbar toolbar = findViewById(R.id.title_bar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         edtextAddIp = findViewById(R.id.edtext_add_ip);
         btnAddFriend = (Button) findViewById(R.id.btn_add_friend);
@@ -54,4 +63,5 @@ public class AddFriendActivity extends BaseActivity implements View.OnClickListe
         }
         Toast.makeText(this, "发送成功", Toast.LENGTH_SHORT).show();
     }
+    
 }

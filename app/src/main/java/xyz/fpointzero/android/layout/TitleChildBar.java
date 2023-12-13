@@ -10,10 +10,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 
 import xyz.fpointzero.android.R;
 
-public class TitleChildBar extends LinearLayout {
+public class TitleChildBar extends Toolbar {
     private ImageButton backButton;
     private TextView title;
 

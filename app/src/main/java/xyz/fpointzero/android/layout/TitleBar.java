@@ -1,5 +1,6 @@
 package xyz.fpointzero.android.layout;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.util.AttributeSet;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.appcompat.widget.Toolbar;
 
 import xyz.fpointzero.android.R;
 import xyz.fpointzero.android.activities.AddFriendActivity;
@@ -20,7 +22,7 @@ import xyz.fpointzero.android.activities.SettingActivity;
 /**
  * MainActivity TitleBar
  */
-public class TitleBar extends LinearLayout implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
+public class TitleBar extends Toolbar implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
 
     private ImageButton menuButton;
     private PopupMenu popupMenu;
@@ -29,7 +31,6 @@ public class TitleBar extends LinearLayout implements View.OnClickListener, Popu
     public TitleBar(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         LayoutInflater.from(context).inflate(R.layout.title_bar, this, true);
-        
         title = findViewById(R.id.textview_title);
         // 获取菜单按钮的引用
         menuButton = findViewById(R.id.menu_btn);

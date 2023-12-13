@@ -1,5 +1,6 @@
 package xyz.fpointzero.android;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
@@ -26,6 +27,8 @@ public class MainActivity extends BaseActivity implements MyWebSocketManager.Web
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ActivityUtil.getInstance().getMap().put(TAG, this);
+        setSupportActionBar(findViewById(R.id.title_bar));
+        
         // 初始化变量
         init();
     }
@@ -59,7 +62,7 @@ public class MainActivity extends BaseActivity implements MyWebSocketManager.Web
                 DialogUtil.showConnectDialog(MainActivity.this, info);
         } else if (type == Type.CLIENT) {
             if (info.getAction() == Type.DATA_CONNECT)
-                DialogUtil.showConnectDialog(MainActivity.this, info);
+                ;
         }
     }
 

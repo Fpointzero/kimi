@@ -63,6 +63,15 @@ public class Message {
 //        this.publicKey = publicKey;
 //    }
 
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
     public String getMsg() {
         return msg;
     }
@@ -108,6 +117,7 @@ public class Message {
         Message connectMsg = new Message();
         connectMsg.setAction(Type.DATA_CONNECT);
         connectMsg.setUserID(SettingUtil.getInstance().getSetting().getUserID());
+        connectMsg.setUsername(SettingUtil.getInstance().getSetting().getUsername());
         connectMsg.setMsg(RSAUtil.publicKeyToString(SettingUtil.getInstance().getSetting().getPublicKey()));
 //        this.setPublicKey(SettingUtil.getInstance().getSetting().getPublicKey());
         return connectMsg;

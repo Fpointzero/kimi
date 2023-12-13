@@ -1,5 +1,6 @@
 package xyz.fpointzero.android.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import java.util.List;
 import xyz.fpointzero.android.MainActivity;
 import xyz.fpointzero.android.R;
 import xyz.fpointzero.android.activities.ChatActivity;
+import xyz.fpointzero.android.activities.TestActivity;
 import xyz.fpointzero.android.data.User;
 import xyz.fpointzero.android.utils.activity.ActivityUtil;
 
@@ -37,15 +39,17 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         return holder;
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         User user = contactList.get(position);
-        holder.contactID.setText(user.getUserID());
+        holder.contactID.setText(user.getUsername() + " (" + user.getUserID() + ")");
         holder.contactView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Context context = holder.contactID.getContext();
-                Intent intent = new Intent(context, ChatActivity.class);
+//                Intent intent = new Intent(context, ChatActivity.class);
+                Intent intent = new Intent(context, TestActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("userID", user.getUserID());
                 bundle.putString("username", user.getUsername());

@@ -12,7 +12,8 @@
     <xyz.fpointzero.android.layout.TitleChildBar
         android:id="@+id/activity_chat_title"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        app:contentInsetStart="0dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/activity_chat_recyclerview"

@@ -1,5 +1,7 @@
 package xyz.fpointzero.android.utils.data;
 
+import android.content.ContentValues;
+
 import org.litepal.LitePal;
 
 import java.security.PublicKey;
@@ -37,5 +39,11 @@ public class UserUtil {
     
     public static String getUserID(PublicKey publicKey) {
         return MD5Util.stringToMD5(RSAUtil.publicKeyToString(publicKey));
+    }
+    
+    public static int removeWhiteList(String userID) {
+        ContentValues cv = new ContentValues();
+        cv.put("isWhite", "0");
+        return LitePal.updateAll(User.class, cv, "userid = ?", userID);
     }
 }

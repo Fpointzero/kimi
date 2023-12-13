@@ -6,17 +6,21 @@
     android:layout_height="match_parent"
     tools:context=".activities.AddFriendActivity">
 
+    <xyz.fpointzero.android.layout.TitleChildBar
+        android:id="@+id/title_bar"
+        android:layout_width="match_parent"
+        app:titleValue="@string/add_friend"
+        tools:ignore="MissingConstraints"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        app:contentInsetStart="0dp"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         tools:ignore="MissingConstraints">
-
-        <xyz.fpointzero.android.layout.TitleChildBar
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:titleValue="@string/add_friend"
-            tools:ignore="MissingConstraints" />
 
         <View
             android:layout_width="match_parent"

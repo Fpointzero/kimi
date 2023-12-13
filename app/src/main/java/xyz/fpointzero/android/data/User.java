@@ -6,7 +6,6 @@ import org.litepal.crud.LitePalSupport;
 public class User extends LitePalSupport {
     @Column(unique = true, defaultValue = "unknown")
     private String userID;
-    // TODO: 增加用户名功能
     private String username;
     private String ip;
     private boolean isBlack;

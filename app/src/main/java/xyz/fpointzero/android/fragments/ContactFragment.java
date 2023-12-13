@@ -43,4 +43,8 @@ public class ContactFragment extends Fragment {
             recyclerView.setAdapter(contactAdapter);
         }
     }
+    
+    public void flushContactList() {
+        contactList = UserUtil.getWhiteList();
+    }
 }

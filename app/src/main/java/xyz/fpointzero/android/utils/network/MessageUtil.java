@@ -100,6 +100,6 @@ public class MessageUtil {
         url += ipAndPort.contains(":") ? ipAndPort : ipAndPort + ":10808";
         url += "/webSocket";
         MyWebSocket myWebSocket = MyWebSocketManager.getInstance().getClientWS(url);
-        myWebSocket.send(msg.toString());
+//        myWebSocket.send(msg.toString());
     }
 }

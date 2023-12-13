@@ -1,12 +1,11 @@
 package xyz.fpointzero.android.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.litepal.LitePal;
 
@@ -14,7 +13,6 @@ import java.util.List;
 
 import xyz.fpointzero.android.R;
 import xyz.fpointzero.android.adapters.ChatMessageAdapter;
-import xyz.fpointzero.android.adapters.ContactAdapter;
 import xyz.fpointzero.android.data.ChatMessage;
 import xyz.fpointzero.android.layout.TitleChildBar;
 import xyz.fpointzero.android.utils.activity.ActivityUtil;
