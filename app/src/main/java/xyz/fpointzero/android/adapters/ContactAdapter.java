@@ -30,6 +30,10 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         this.contactList = contactList;
     }
 
+    public void setContactList(List<User> contactList) {
+        this.contactList = contactList;
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -48,8 +52,8 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
             @Override
             public void onClick(View v) {
                 Context context = holder.contactID.getContext();
-//                Intent intent = new Intent(context, ChatActivity.class);
-                Intent intent = new Intent(context, TestActivity.class);
+                Intent intent = new Intent(context, ChatActivity.class);
+//                Intent intent = new Intent(context, TestActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("userID", user.getUserID());
                 bundle.putString("username", user.getUsername());

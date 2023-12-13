@@ -19,6 +19,10 @@ public class UserUtil {
     public static ArrayList<User> getWhiteList() {
         return new ArrayList<User>(LitePal.where("isWhite = ?", "1").find(User.class));
     }
+
+    public static ArrayList<User> getWhiteList(String searchValue) {
+        return new ArrayList<User>(LitePal.where("isWhite = ? and username like ?", "1", "%"+ searchValue +"%").find(User.class));
+    }
     
     public static boolean isInList(ArrayList<User> list, User user) {
         for (int i = 0; i < list.size(); i++) {

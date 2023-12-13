@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/option_connect"
+        android:title="@string/connect" />
+    <item
         android:id="@+id/option_remove"
         android:icon="@drawable/ic_user_24"
         android:title="@string/remove_friend" />

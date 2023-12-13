@@ -4,11 +4,9 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 
-import org.litepal.LitePal;
-
 import xyz.fpointzero.android.data.User;
+import xyz.fpointzero.android.fragments.ContactFragment;
 import xyz.fpointzero.android.network.Message;
-import xyz.fpointzero.android.utils.network.MessageUtil;
 
 public class DialogUtil {
     public static void showConnectDialog(Context context, Message msg) {
@@ -21,6 +19,7 @@ public class DialogUtil {
                 User user = new User(msg.getUserID(), msg.getUsername(), msg.getIp());
                 user.setWhite(true);
                 user.saveOrUpdate("userid = ?", user.getUserID());
+                ContactFragment.flushContactList();
             }
         });
         builder.setNegativeButton("拒绝", null);

@@ -1,12 +1,5 @@
 package xyz.fpointzero.android.activities;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,6 +8,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import org.litepal.LitePal;
 
 import java.util.List;
@@ -22,9 +21,7 @@ import java.util.List;
 import xyz.fpointzero.android.R;
 import xyz.fpointzero.android.adapters.ChatMessageAdapter;
 import xyz.fpointzero.android.data.ChatMessage;
-import xyz.fpointzero.android.data.User;
-import xyz.fpointzero.android.fragments.MessageFragment;
-import xyz.fpointzero.android.layout.TitleChildBar;
+import xyz.fpointzero.android.fragments.ContactFragment;
 import xyz.fpointzero.android.utils.activity.ActivityUtil;
 import xyz.fpointzero.android.utils.data.UserUtil;
 
@@ -96,6 +93,7 @@ public class TestActivity extends AppCompatActivity {
         if (itemID == R.id.option_remove) {
             UserUtil.removeWhiteList(userID);
             finish();
+            ContactFragment.flushContactList();
         }
         return true;
     }
