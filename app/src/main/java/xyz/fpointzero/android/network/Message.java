@@ -23,11 +23,14 @@ public class Message {
 
     public Message(int action, String msg) {
         this.action = action;
+        this.setMsg(msg);
+        
+        // 根据系统设置自动生成
         this.setUserID(SettingUtil.getInstance().getSetting().getUserID());
         this.username = SettingUtil.getInstance().getSetting().getUsername();
-        this.ip = NetworkUtil.getDeviceIPv4Address();
+        this.ip = NetworkUtil.getDeviceIPv4Address() + ":" + MockWebServerManager.getInstance().getPort();
 //        this.setPublicKey(SettingUtil.getInstance().getSetting().getPublicKey());
-        this.setMsg(msg);
+        
 //        generateValid();
     }
 

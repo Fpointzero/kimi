@@ -1,25 +1,15 @@
 package xyz.fpointzero.android.utils.network;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
-
-import java.io.IOException;
-
-import okhttp3.Call;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import xyz.fpointzero.android.constants.Type;
-import xyz.fpointzero.android.network.Callback;
 import xyz.fpointzero.android.network.Message;
 import xyz.fpointzero.android.network.MyWebSocket;
-import xyz.fpointzero.android.network.MyWebSocketManager;
+import xyz.fpointzero.android.network.ClientWebSocketManager;
 
 public class MessageUtil {
     private static final String TAG = "MessageUtil";
+    
+    public static void sendTextMsg() {
+        
+    }
 
     //    public static String sendMessage(String url, Message msg) {
 //        OkHttpClient client = new OkHttpClient();
@@ -95,11 +85,4 @@ public class MessageUtil {
         });
     }
 */
-    public static void sendMessage(String ipAndPort, Message msg) {
-        String url = "ws://";
-        url += ipAndPort.contains(":") ? ipAndPort : ipAndPort + ":10808";
-        url += "/webSocket";
-        MyWebSocket myWebSocket = MyWebSocketManager.getInstance().getClientWS(url);
-//        myWebSocket.send(msg.toString());
-    }
 }

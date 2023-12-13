@@ -20,7 +20,7 @@ import xyz.fpointzero.android.constants.Type;
 import xyz.fpointzero.android.network.Message;
 import xyz.fpointzero.android.network.MockWebServerManager;
 import xyz.fpointzero.android.network.MyWebSocket;
-import xyz.fpointzero.android.network.MyWebSocketManager;
+import xyz.fpointzero.android.network.ClientWebSocketManager;
 
 public class TestFragment extends Fragment {
     @Nullable
@@ -44,7 +44,11 @@ public class TestFragment extends Fragment {
             public void onClick(View v) {
                 final String msg;
                 msg = JSON.toJSONString(new Message(Type.DATA_PING, editText.getText().toString()));
-                MockWebServerManager.getInstance().send(msg);
+                try {
+                    MockWebServerManager.getInstance().sendAll(msg.getBytes(StandardCharsets.UTF_8));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
         btnClientSend.setOnClickListener(new View.OnClickListener() {
@@ -53,7 +57,7 @@ public class TestFragment extends Fragment {
                 final String msg;
                 msg = JSON.toJSONString(new Message(Type.DATA_PING, editText.getText().toString()));
                 try {
-                    MyWebSocketManager.getInstance().sendAllByEncrypt(msg.getBytes(StandardCharsets.UTF_8));
+                    ClientWebSocketManager.getInstance().sendAllByEncrypt(msg.getBytes(StandardCharsets.UTF_8));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

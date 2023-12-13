@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.security.PublicKey;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -27,7 +28,7 @@ import xyz.fpointzero.android.utils.data.SettingUtil;
 import xyz.fpointzero.android.utils.crypto.RSAUtil;
 
 public class MyWebSocket {
-    private static final String TAG = "MyWebSocket";
+    public static final String TAG = "MyWebSocket";
     private OkHttpClient mClient;
     private WebSocket mWebSocket;
     private String wsURL;
@@ -63,7 +64,7 @@ public class MyWebSocket {
                 .url(this.wsURL)
                 .build();
         mWebSocket = mClient.newWebSocket(request, new WsListener());
-        MyWebSocketManager.getInstance().add(this);
+//        MyWebSocketManager.getInstance().add(this);
     }
 
     /**
@@ -112,7 +113,7 @@ public class MyWebSocket {
                 heartHandler.sendEmptyMessageDelayed(10, 20000);
             } else {
                 //没有收到pong命令，进行重连
-                disconnect(1001, "断线重连");
+                disconnect(ErrorType.CONNECT_CLOSE, "断线重连");
             }
             return false;
         }
@@ -136,9 +137,12 @@ public class MyWebSocket {
             Log.e(TAG, "onClosed！");
             //断线重连
             heartHandler.sendEmptyMessage(~10);
-            if (code == 1001) {
-                Log.e(TAG, "断线重连！");
-                connect();
+            Set<String> keys = ClientWebSocketManager.getClientWebSocketMap().keySet();
+            for (String key : keys) {
+                if (ClientWebSocketManager.getClientWebSocketMap().get(key).getmWebSocket() == webSocket) {
+                    ClientWebSocketManager.getClientWebSocketMap().remove(key);
+                    return;
+                }
             }
 
         }
@@ -152,6 +156,13 @@ public class MyWebSocket {
         public void onFailure(@NotNull okhttp3.WebSocket webSocket, @NotNull Throwable t, @Nullable Response response) {
             super.onFailure(webSocket, t, response);
             Log.e(TAG, "onFailure！" + t.getMessage());
+            Set<String> keys = ClientWebSocketManager.getClientWebSocketMap().keySet();
+            for (String key : keys) {
+                if (ClientWebSocketManager.getClientWebSocketMap().get(key).getmWebSocket() == webSocket) {
+                    ClientWebSocketManager.getClientWebSocketMap().remove(key);
+                    return;
+                }
+            }
         }
 
         @Override
@@ -165,8 +176,14 @@ public class MyWebSocket {
                     isReceivePong = true;
                     heartHandler.sendEmptyMessage(10);
                     publicKey = RSAUtil.publicKeyFromString(data.getMsg());
-                    MyWebSocketManager.getInstance().onWSDataChanged(Type.CLIENT, data);
+                    if (ClientWebSocketManager.getClientWebSocketMap().get(data.getUserID()) == null)
+                        ClientWebSocketManager.getInstance().putIfAbsent(data.getUserID(), MyWebSocket.this);
+                    else
+                        webSocket.close(ErrorType.CONNECT_CLOSE, "重复的连接");
                     return;
+                }
+                if (data.getAction() == Type.DATA_ADD) {
+                    ClientWebSocketManager.getInstance().onWSDataChanged(Type.CLIENT, data);
                 }
             } catch (Exception e) {
                 Log.e(TAG, "onMessage:", e);

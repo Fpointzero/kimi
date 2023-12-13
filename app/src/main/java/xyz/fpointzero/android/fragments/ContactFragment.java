@@ -22,7 +22,7 @@ import xyz.fpointzero.android.adapters.ContactAdapter;
 import xyz.fpointzero.android.data.User;
 import xyz.fpointzero.android.utils.data.UserUtil;
 
-public class ContactFragment extends Fragment implements View.OnClickListener{
+public class ContactFragment extends Fragment implements View.OnClickListener {
     public static final String TAG = "ContactFragment";
     private static List<User> contactList;
     private static ContactAdapter contactAdapter;
@@ -45,22 +45,24 @@ public class ContactFragment extends Fragment implements View.OnClickListener{
         recyclerView.setAdapter(contactAdapter);
         return view;
     }
-    
+
     @Override
     public void onResume() {
         super.onResume();
-        
+
         flushContactList();
     }
-    
+
     @SuppressLint("NotifyDataSetChanged")
     public static void flushContactList() {
         Log.d(TAG, "flushContactList: ");
-        contactList = UserUtil.getWhiteList();
-        contactAdapter.setContactList(contactList);
-        contactAdapter.notifyDataSetChanged();
+        if (contactAdapter != null) {
+            contactList = UserUtil.getWhiteList();
+            contactAdapter.setContactList(contactList);
+            contactAdapter.notifyDataSetChanged();
+        }
     }
-    
+
     public void search() {
         contactList = UserUtil.getWhiteList(etSearch.getText().toString());
         contactAdapter.setContactList(contactList);

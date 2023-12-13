@@ -4,9 +4,13 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 
+import java.nio.charset.StandardCharsets;
+
+import xyz.fpointzero.android.constants.Type;
 import xyz.fpointzero.android.data.User;
 import xyz.fpointzero.android.fragments.ContactFragment;
 import xyz.fpointzero.android.network.Message;
+import xyz.fpointzero.android.network.MockWebServerManager;
 
 public class DialogUtil {
     public static void showConnectDialog(Context context, Message msg) {
@@ -20,6 +24,7 @@ public class DialogUtil {
                 user.setWhite(true);
                 user.saveOrUpdate("userid = ?", user.getUserID());
                 ContactFragment.flushContactList();
+                MockWebServerManager.getInstance().getServerWS(msg.getUserID()).send(new Message(Type.DATA_ADD,"success").toString());
             }
         });
         builder.setNegativeButton("拒绝", null);
@@ -37,6 +42,7 @@ public class DialogUtil {
     
     public static void showSuccessDialog(Context context, String msg) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Success");
         builder.setMessage(msg);
         builder.setPositiveButton("OK", null);
         builder.show();

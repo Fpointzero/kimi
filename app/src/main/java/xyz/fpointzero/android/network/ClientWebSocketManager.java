@@ -5,77 +5,96 @@ import android.os.Looper;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import okio.ByteString;
+import xyz.fpointzero.android.constants.ErrorType;
 import xyz.fpointzero.android.utils.data.UserUtil;
 
 
-public class MyWebSocketManager {
+public class ClientWebSocketManager {
     private static final String TAG = "MyWebSocket";
-    private static MyWebSocketManager sInstance;
+    private static ClientWebSocketManager sInstance;
     private static Handler sDelivery;
     private static ArrayList<WeakReference<WebSocketDataListener>> sWeakRefListeners;
     //连接的websocket地址
-    private static ArrayList<MyWebSocket> mWebSockets;
-    
-    private MyWebSocketManager(){}
-    
-    public MyWebSocket getClientWS(String url) {
-        for (int i = 0; i < mWebSockets.size(); i++) {
-            if (mWebSockets.get(i).getWsURL().equals(url)) {
-                return mWebSockets.get(i);
+    private static HashMap<String, MyWebSocket> clientWebSocketMap;
+    private static List<MyWebSocket> tmpList;
+
+    private ClientWebSocketManager() {
+    }
+
+    public synchronized static ClientWebSocketManager getInstance() {
+        if (sInstance == null) {
+            clientWebSocketMap = new HashMap<String, MyWebSocket>();
+            sDelivery = new Handler(Looper.getMainLooper());
+            sWeakRefListeners = new ArrayList<WeakReference<WebSocketDataListener>>();
+            sInstance = new ClientWebSocketManager();
+        }
+        return sInstance;
+    }
+
+    public MyWebSocket getClientWS(String userID) {
+        return clientWebSocketMap.get(userID);
+    }
+
+    /**
+     * 创建webSocket
+     *
+     * @param url
+     * @return
+     */
+    public MyWebSocket createClientWS(String url) {
+        Set<String> keys = clientWebSocketMap.keySet();
+        for (String key : keys) {
+            if (clientWebSocketMap.get(key).getWsURL().equals(url)) {
+                return clientWebSocketMap.get(key);
             }
         }
         MyWebSocket myWebSocket = new MyWebSocket(url);
         return myWebSocket;
     }
+
     public void closeAll() {
-        for (int i = 0; i < mWebSockets.size(); i++) {
-            mWebSockets.get(i).disconnect(1000, "客户端已关闭");
+        Set<String> keys = clientWebSocketMap.keySet();
+        for (String key : keys) {
+            clientWebSocketMap.get(key).disconnect(ErrorType.CONNECT_CLOSE, "客户端已关闭");
         }
     }
 
-    public synchronized static MyWebSocketManager getInstance() {
-        if (sInstance == null) {
-            mWebSockets = new ArrayList<MyWebSocket>();
-            sDelivery = new Handler(Looper.getMainLooper());
-            sWeakRefListeners = new ArrayList<WeakReference<WebSocketDataListener>>();
-            sInstance = new MyWebSocketManager();
-        }
-        return sInstance;
-    }
-    
-    void add(MyWebSocket myWebSocket) {
-        if (!mWebSockets.contains(myWebSocket))
-            mWebSockets.add(myWebSocket);
-    }
-    
-    public void sendAll(final String msg) {
-        for (int i = 0; i < mWebSockets.size(); i++) {
-            mWebSockets.get(i).send(msg);
-        }
+    void put(String userID, MyWebSocket myWebSocket) {
+        clientWebSocketMap.put(userID, myWebSocket);
     }
 
+    void putIfAbsent(String userID, MyWebSocket myWebSocket) {
+        clientWebSocketMap.putIfAbsent(userID, myWebSocket);
+    }
+
+    public void sendAll(final byte[] msg) {
+        Set<String> keys = clientWebSocketMap.keySet();
+        for (String key : keys) {
+            clientWebSocketMap.get(key).send(new ByteString(msg));
+        }
+    }
     public void sendAll(final ByteString msg) {
-        for (int i = 0; i < mWebSockets.size(); i++) {
-            mWebSockets.get(i).send(msg);
-        }
-    }
-    
-    public void sendAllByEncrypt(final byte[] msg) throws Exception {
-        for (int i = 0; i < mWebSockets.size(); i++) {
-            mWebSockets.get(i).sendByEncrypt(msg);
+        Set<String> keys = clientWebSocketMap.keySet();
+        for (String key : keys) {
+            clientWebSocketMap.get(key).send(msg);
         }
     }
 
-    public void sendByEncrypt(final byte[] msg, String userID) throws Exception {
-        for (int i = 0; i < mWebSockets.size(); i++) {
-            if(UserUtil.getUserID(mWebSockets.get(i).getPublicKey()).equals(userID)){
-                mWebSockets.get(i).sendByEncrypt(msg);
-                return;
-            }
+    public void sendAllByEncrypt(final byte[] msg) throws Exception {
+        Set<String> keys = clientWebSocketMap.keySet();
+        for (String key : keys) {
+            clientWebSocketMap.get(key).sendByEncrypt(msg);
         }
+    }
+
+    public void sendByEncrypt(String userID, final byte[] msg) throws Exception {
+        clientWebSocketMap.get(userID).sendByEncrypt(msg);
     }
 
     /**
@@ -144,8 +163,11 @@ public class MyWebSocketManager {
     public interface WebSocketDataListener {
         void onWebSocketData(int type, xyz.fpointzero.android.network.Message info);
     }
-
-    public ArrayList<MyWebSocket> getmWebSockets() {
-        return mWebSockets;
+    public static HashMap<String, MyWebSocket> getClientWebSocketMap() {
+        return clientWebSocketMap;
+    }
+    
+    public static Handler getsDelivery() {
+        return sDelivery;
     }
 }

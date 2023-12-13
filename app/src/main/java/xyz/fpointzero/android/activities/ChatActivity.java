@@ -22,6 +22,9 @@ import xyz.fpointzero.android.adapters.ChatMessageAdapter;
 import xyz.fpointzero.android.data.ChatMessage;
 import xyz.fpointzero.android.fragments.ContactFragment;
 import xyz.fpointzero.android.layout.TitleChildBar;
+import xyz.fpointzero.android.network.ClientWebSocketManager;
+import xyz.fpointzero.android.network.MockWebServerManager;
+import xyz.fpointzero.android.network.MyWebSocket;
 import xyz.fpointzero.android.utils.activity.ActivityUtil;
 import xyz.fpointzero.android.utils.data.UserUtil;
 
@@ -33,6 +36,7 @@ public class ChatActivity extends BaseActivity {
     String username;
     TextView tvUsername;
     TextView tvStatus;
+    MyWebSocket socket;
 
     @SuppressLint("UseSupportActionBar")
     @Override
@@ -49,6 +53,7 @@ public class ChatActivity extends BaseActivity {
         init();
     }
 
+    @SuppressLint("ResourceAsColor")
     private void init() {
         Intent intent = getIntent();
         try {
@@ -68,7 +73,25 @@ public class ChatActivity extends BaseActivity {
             tvUsername = findViewById(R.id.tv_username);
             tvStatus = findViewById(R.id.tv_status);
             tvUsername.setText(username);
-            tvStatus.setText("offline");
+            
+            // 判断是否在线 TODO:动态刷新
+            MyWebSocket socket1 = MockWebServerManager.getInstance().getServerWS(userID);
+            MyWebSocket socket2 = ClientWebSocketManager.getInstance().getClientWS(userID);
+            if (socket1 != null)
+                socket = socket1;
+            else if (socket2 != null)
+                socket = socket2;
+            else
+                socket = null;
+            
+            if (socket == null) {
+                tvStatus.setTextColor(R.color.red);
+                tvStatus.setText("offline");
+            }
+            else {
+                tvStatus.setTextColor(R.color.green);
+                tvStatus.setText("online");
+            }
         } catch (Exception e) {
             Log.e(TAG, "initData: " + e.getMessage(), e);
             finish();
@@ -91,7 +114,10 @@ public class ChatActivity extends BaseActivity {
             finish();
             ContactFragment.flushContactList();
         } else if (itemID == R.id.option_connect) {
-            
+            if (socket == null) {
+                // TODO:修改内容
+                ClientWebSocketManager.getInstance().createClientWS("ws://192.168.31.41:10808/webSocket");
+            }
         }
         return true;
     }

@@ -1,25 +1,28 @@
 package xyz.fpointzero.android;
 
-import android.content.Intent;
+import android.content.ContentValues;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
 import androidx.fragment.app.FragmentTransaction;
 
+import org.litepal.LitePal;
+
 import java.io.IOException;
 
+import xyz.fpointzero.android.data.User;
 import xyz.fpointzero.android.utils.activity.ActivityUtil;
 import xyz.fpointzero.android.activities.BaseActivity;
 import xyz.fpointzero.android.constants.Type;
 import xyz.fpointzero.android.fragments.MessageFragment;
 import xyz.fpointzero.android.network.Message;
 import xyz.fpointzero.android.network.MockWebServerManager;
-import xyz.fpointzero.android.network.MyWebSocketManager;
+import xyz.fpointzero.android.network.ClientWebSocketManager;
 import xyz.fpointzero.android.utils.activity.DialogUtil;
 import xyz.fpointzero.android.utils.data.SettingUtil;
 
-public class MainActivity extends BaseActivity implements MyWebSocketManager.WebSocketDataListener {
+public class MainActivity extends BaseActivity implements ClientWebSocketManager.WebSocketDataListener {
     public static final String TAG = "MainActivity";
 
     @Override
@@ -44,7 +47,7 @@ public class MainActivity extends BaseActivity implements MyWebSocketManager.Web
         }).start();
 
         // socket事件注册
-        MyWebSocketManager.getInstance().registerWSDataListener(this);
+        ClientWebSocketManager.getInstance().registerWSDataListener(this);
 
         // 界面加载
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -55,14 +58,18 @@ public class MainActivity extends BaseActivity implements MyWebSocketManager.Web
     }
 
     @Override
-    public void onWebSocketData(int type, Message info) {
-        Log.d(TAG, "onWebSocketData: Type: " + type + " Receive data: " + info.toString());
+    public void onWebSocketData(int type, Message data) {
+        Log.d(TAG, "onWebSocketData: Type: " + type + " Receive data: " + data.toString());
         if (type == Type.SERVER) {
-            if (info.getAction() == Type.DATA_CONNECT)
-                DialogUtil.showConnectDialog(MainActivity.this, info);
+            if (data.getAction() == Type.DATA_ADD && data.getMsg().equals("request"))
+                DialogUtil.showConnectDialog(MainActivity.this, data);
         } else if (type == Type.CLIENT) {
-            if (info.getAction() == Type.DATA_CONNECT)
-                ;
+            if (data.getAction() == Type.DATA_ADD && data.getMsg().equals("success")) {
+                DialogUtil.showSuccessDialog(MainActivity.this, data.getUsername() + " (" + data.getUserID() +") 已同意");
+                ContentValues contentValues = new ContentValues();
+                contentValues.put("isWhite", "1");
+                LitePal.updateAll(User.class, contentValues, "userid = ?", data.getUserID());
+            }
         }
     }
 
@@ -71,7 +78,7 @@ public class MainActivity extends BaseActivity implements MyWebSocketManager.Web
         super.onDestroy();
         SettingUtil.getInstance().saveSetting(MainActivity.this);
         try {
-            MyWebSocketManager.getInstance().closeAll();
+            ClientWebSocketManager.getInstance().closeAll();
             MockWebServerManager.getInstance().close();
         } catch (IOException e) {
             throw new RuntimeException(e);
