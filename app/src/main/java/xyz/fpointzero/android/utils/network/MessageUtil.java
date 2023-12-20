@@ -1,14 +1,40 @@
 package xyz.fpointzero.android.utils.network;
 
+import android.annotation.SuppressLint;
+import android.database.Cursor;
+
+import org.litepal.LitePal;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import xyz.fpointzero.android.data.ChatMessage;
 import xyz.fpointzero.android.network.Message;
-import xyz.fpointzero.android.network.MyWebSocket;
-import xyz.fpointzero.android.network.ClientWebSocketManager;
 
 public class MessageUtil {
     private static final String TAG = "MessageUtil";
     
     public static void sendTextMsg() {
         
+    }
+
+    @SuppressLint("Range")
+    public static List<Message> getMsgList() {
+        List<Message> messageList = new ArrayList<Message>();
+//        Cursor cursor = LitePal.findBySQL("SELECT * from (SELECT * FROM `chatmessage` a LEFT JOIN user b ON a.userid = b.userid ORDER BY timestamp DESC) as t GROUP BY userid;");
+//        Cursor cursor = LitePal.findBySQL("SELECT * from (SELECT * from `chatmessage` AS a LEFT JOIN user AS b ON a.userid = b.userid ORDER BY timestamp ASC) as t GROUP BY userid ORDER BY timestamp DESC");
+        // 为什么ASC反而变成了DESC ？ SQL语句要用DESC，但是这里用ASC;
+        Cursor cursor = LitePal.findBySQL("select * from (SELECT * FROM `chatmessage` as a LEFT JOIN user as b on a.userid = b.userid order by timestamp ASC) as t GROUP BY userid;");
+        while (cursor.moveToNext()) {
+            String userID = cursor.getString(cursor.getColumnIndex("userid"));
+            String username = cursor.getString(cursor.getColumnIndex("username"));
+            String message = cursor.getString(cursor.getColumnIndex("message"));
+            String ip = cursor.getString(cursor.getColumnIndex("ip"));
+            Message msg = new Message(userID, username, message, ip);
+            messageList.add(msg);
+        }
+        cursor.close();
+        return messageList;
     }
 
     //    public static String sendMessage(String url, Message msg) {

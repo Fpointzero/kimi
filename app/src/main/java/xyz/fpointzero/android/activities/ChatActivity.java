@@ -42,6 +42,7 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
     private ChatMessageAdapter chatMessageAdapter;
 
     Thread flushThread;
+    boolean isStop = false;
     String userID;
     String username;
     String ip;
@@ -82,12 +83,14 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
             while (true) {
                 try {
                     Thread.sleep(2000);
-                    chatMessageList = LitePal.where("sender = ? or receiver = ?", userID, userID).find(ChatMessage.class);
+                    chatMessageList = LitePal.where("userid = ?", userID).find(ChatMessage.class);
                     chatMessageAdapter.setChatMsgList(chatMessageList);
                     runOnUiThread(() -> {
                         flushStatus();
                         chatMessageAdapter.notifyDataSetChanged();
                     });
+                    if (isStop) 
+                        return;
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -110,7 +113,7 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
             recyclerView.setLayoutManager(linearLayoutManager);
 
-            chatMessageList = LitePal.where("sender = ? or receiver = ?", userID, userID).order("timestamp").find(ChatMessage.class);
+            chatMessageList = LitePal.where("userid = ?", userID).order("timestamp").find(ChatMessage.class);
             chatMessageAdapter = new ChatMessageAdapter(chatMessageList);
             recyclerView.setAdapter(chatMessageAdapter);
             // init view
@@ -196,9 +199,9 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
             try {
                 String msg = input.getText().toString();
                 if (!"".equals(msg)) {
-                    new ChatMessage(SettingUtil.getInstance().getSetting().getUserID(), userID, msg, System.currentTimeMillis()).save();
+                    new ChatMessage(userID, false, msg, System.currentTimeMillis()).save();
                     socket.sendByEncrypt(new Message(DataType.DATA_PRIVATE, msg).toString().getBytes(StandardCharsets.UTF_8));
-                    chatMessageList = LitePal.where("sender = ? or receiver = ?", userID, userID).find(ChatMessage.class);
+                    chatMessageList = LitePal.where("userid = ?", userID).find(ChatMessage.class);
                     chatMessageAdapter.setChatMsgList(chatMessageList);
                     chatMessageAdapter.notifyDataSetChanged();
                     input.setText("");
@@ -222,5 +225,11 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
                 uploadImg.setVisibility(View.VISIBLE);
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        isStop = true;
     }
 }

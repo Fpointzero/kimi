@@ -50,4 +50,8 @@ public class UserUtil {
         cv.put("isWhite", "0");
         return LitePal.updateAll(User.class, cv, "userid = ?", userID);
     }
+    
+    public static User getUser(String userid) {
+        return LitePal.where("userid = ?", userid).find(User.class).get(0);
+    }
 }

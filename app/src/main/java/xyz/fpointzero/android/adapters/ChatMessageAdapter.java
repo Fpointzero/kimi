@@ -31,7 +31,7 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_list, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chatmessage, parent, false);
         final ChatMessageAdapter.ViewHolder holder = new ChatMessageAdapter.ViewHolder(view);
 
         return holder;
@@ -41,7 +41,7 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ChatMessage chatMsg = chatMsgList.get(position);
         // TODO: 处理图像内容 还有处理
-        if (chatMsg.getSender() != null && chatMsg.getSender().equals(SettingUtil.getInstance().getSetting().getUserID())) {
+        if (!chatMsg.isSend()) {
             holder.rightTime.setText(DateUtil.toYMD(chatMsg.getTimestamp()));
             holder.rightContent.setText(chatMsg.getMessage());
             

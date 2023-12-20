@@ -82,5 +82,9 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
             contactID = itemView.findViewById(R.id.textview_contact);
         }
     }
-    
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
+    }
 }

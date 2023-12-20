@@ -24,22 +24,21 @@ public class Message {
     public Message(int action, String msg) {
         this.action = action;
         this.setMsg(msg);
-        
+
         // 根据系统设置自动生成
         this.setUserID(SettingUtil.getInstance().getSetting().getUserID());
         this.username = SettingUtil.getInstance().getSetting().getUsername();
         this.ip = NetworkUtil.getDeviceIPv4Address() + ":" + MockWebServerManager.getInstance().getPort();
 //        this.setPublicKey(SettingUtil.getInstance().getSetting().getPublicKey());
-        
+
 //        generateValid();
     }
 
-    public Message(int action, String userID, String publicKey, String msg, String valid) {
-        this.action = action;
+    public Message(String userID, String username, String msg, String ip) {
         this.userID = userID;
-//        this.publicKey = publicKey;
+        this.username = username;
         this.msg = msg;
-//        this.valid = valid;
+        this.ip = ip;
     }
 
     public int getAction() {
@@ -104,7 +103,7 @@ public class Message {
         return RSAUtil.verify(RSAUtil.publicKeyFromString(publicKey), this.valid, this.userID);
     }
      */
-    
+
 
 //    public boolean verify() {
 //        String stringBuilder = this.action +
@@ -118,7 +117,7 @@ public class Message {
 
     public static Message getConnectMessage() {
         Message connectMsg = new Message(DataType.DATA_CONNECT, RSAUtil.publicKeyToString(SettingUtil.getInstance().getSetting().getPublicKey()));
-        
+
 //        connectMsg.setAction(Type.DATA_CONNECT);
 //        connectMsg.setUserID(SettingUtil.getInstance().getSetting().getUserID());
 //        connectMsg.setUsername(SettingUtil.getInstance().getSetting().getUsername());

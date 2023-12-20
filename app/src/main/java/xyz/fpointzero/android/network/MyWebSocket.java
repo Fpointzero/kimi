@@ -222,7 +222,7 @@ public class MyWebSocket {
                 }
                 if (UserUtil.isInWhiteList(user)) {
                     if (DataType.DATA_PRIVATE == data.getAction()) {
-                        new ChatMessage(user.getUserID(), SettingUtil.getInstance().getSetting().getUserID(), data.getMsg(), System.currentTimeMillis()).save();
+                        new ChatMessage(user.getUserID(), true, data.getMsg(), System.currentTimeMillis()).save();
                         return;
                     }
                     ClientWebSocketManager.getInstance().onWSDataChanged(DataType.CLIENT, data);

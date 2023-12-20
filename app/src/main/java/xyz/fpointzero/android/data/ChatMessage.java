@@ -1,10 +1,19 @@
 package xyz.fpointzero.android.data;
 
+import android.annotation.SuppressLint;
+import android.database.Cursor;
+
+import org.litepal.LitePal;
 import org.litepal.crud.LitePalSupport;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import xyz.fpointzero.android.network.Message;
+
 public class ChatMessage extends LitePalSupport {
-    private String sender;
-    private String receiver;
+    private String userid;
+    private boolean isSend;
     private String message;
     private long timestamp;
 
@@ -12,27 +21,15 @@ public class ChatMessage extends LitePalSupport {
         // 默认构造方法
     }
 
-    public ChatMessage(String sender, String receiver, String message, long timestamp) {
-        this.sender = sender;
-        this.receiver = receiver;
+    public ChatMessage(String userid, boolean isSend, String message, long timestamp) {
+        this.userid = userid;
+        this.isSend = isSend;
         this.message = message;
         this.timestamp = timestamp;
     }
 
-    public String getSender() {
-        return sender;
-    }
-
-    public void setSender(String sender) {
-        this.sender = sender;
-    }
-
-    public String getReceiver() {
-        return receiver;
-    }
-
-    public void setReceiver(String receiver) {
-        this.receiver = receiver;
+    public String getUserid() {
+        return userid;
     }
 
     public String getMessage() {
@@ -49,5 +46,17 @@ public class ChatMessage extends LitePalSupport {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public boolean isSend() {
+        return isSend;
+    }
+
+    public void setSend(boolean send) {
+        isSend = send;
+    }
+
+    public void setUserid(String userid) {
+        this.userid = userid;
     }
 }
