@@ -37,19 +37,19 @@ public class BottomNavFragment extends Fragment implements NavigationBarView.OnI
         FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
         if (itemId == R.id.navigation_message) {
             title.setTitle(R.string.navigation_message);
-            transaction.replace(R.id.fragment_main_info, new MessageFragment());
+            transaction.replace(R.id.fragment_main_info, MessageFragment.getInstance());
 
         } else if (itemId == R.id.navigation_contact) {
             title.setTitle(R.string.navigation_contact);
-            transaction.replace(R.id.fragment_main_info, new ContactFragment());
+            transaction.replace(R.id.fragment_main_info, ContactFragment.getInstance());
 
         } else if (itemId == R.id.navigation_nearby) {
             title.setTitle(R.string.navigation_nearby);
-            transaction.replace(R.id.fragment_main_info, new TestFragment());
+            transaction.replace(R.id.fragment_main_info, TestFragment.getInstance());
 
         } else if (itemId == R.id.navigation_mine) {
             title.setTitle(R.string.navigation_mine);
-            transaction.replace(R.id.fragment_main_info, new MineFragment());
+            transaction.replace(R.id.fragment_main_info, MineFragment.getInstance());
 
         }
         transaction.addToBackStack(null);

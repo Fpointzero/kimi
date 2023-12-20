@@ -12,10 +12,18 @@ import androidx.fragment.app.Fragment;
 import xyz.fpointzero.android.R;
 
 public class MessageFragment extends Fragment {
+    private static MessageFragment instance;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_message, container, false);
         return view;
+    }
+
+    public static MessageFragment getInstance() {
+        if (instance == null ) {
+            instance = new MessageFragment();
+        }
+        return instance;
     }
 }

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -24,6 +25,7 @@ import xyz.fpointzero.android.utils.data.UserUtil;
 
 public class ContactFragment extends Fragment implements View.OnClickListener {
     public static final String TAG = "ContactFragment";
+    private static ContactFragment instance;
     private static List<User> contactList;
     private static ContactAdapter contactAdapter;
     private EditText etSearch;
@@ -75,5 +77,11 @@ public class ContactFragment extends Fragment implements View.OnClickListener {
         if (vid == R.id.btn_search) {
             search();
         }
+    }
+
+    public static ContactFragment getInstance() {
+        if (instance == null)
+            instance = new ContactFragment();
+        return instance;
     }
 }

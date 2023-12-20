@@ -13,4 +13,9 @@ public class BaseActivity extends AppCompatActivity {
         super.onRestart();
         ActivityUtil.getInstance().setNowActivity(this);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
 }

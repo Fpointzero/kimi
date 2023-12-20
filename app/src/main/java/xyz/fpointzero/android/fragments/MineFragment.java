@@ -18,6 +18,7 @@ import xyz.fpointzero.android.utils.data.SettingUtil;
 import xyz.fpointzero.android.utils.network.NetworkUtil;
 
 public class MineFragment extends Fragment {
+    private static MineFragment instance;
     TextView username;
     TextView ip;
     @Nullable
@@ -39,5 +40,11 @@ public class MineFragment extends Fragment {
         ip.setText(NetworkUtil.getDeviceIPv4Address() + ":" + SettingUtil.getInstance().getSetting().getServerPort());
         username.setText(SettingUtil.getInstance().getSetting().getUsername());
 //        Toast.makeText(requireActivity(), "Mine re", Toast.LENGTH_SHORT).show();
+    }
+
+    public static MineFragment getInstance() {
+        if (instance == null)
+            instance = new MineFragment();
+        return instance;
     }
 }

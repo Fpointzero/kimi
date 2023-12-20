@@ -52,7 +52,7 @@ public class MainActivity extends BaseActivity implements ClientWebSocketManager
         // 界面加载
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         ((TextView) findViewById(R.id.textview_title)).setText(R.string.navigation_message);
-        transaction.replace(R.id.fragment_main_info, new MessageFragment());
+        transaction.replace(R.id.fragment_main_info, MessageFragment.getInstance());
         transaction.addToBackStack(null);
         transaction.commit();
     }

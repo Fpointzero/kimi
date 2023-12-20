@@ -40,6 +40,24 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_contact, parent, false);
         final ViewHolder holder = new ViewHolder(view);
         
+        
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int position = holder.getBindingAdapterPosition();
+                User user = contactList.get(position);
+                Context context = holder.contactID.getContext();
+                Intent intent = new Intent(context, ChatActivity.class);
+//                Intent intent = new Intent(context, TestActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("userID", user.getUserID());
+                bundle.putString("username", user.getUsername());
+                bundle.putString("ip", user.getIp());
+                intent.putExtras(bundle);
+                context.startActivity(intent);
+                Toast.makeText(context, "click " + user.getUserID(), Toast.LENGTH_SHORT).show();
+            }
+        });
         return holder;
     }
 
@@ -48,20 +66,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         User user = contactList.get(position);
         holder.contactID.setText(user.getUsername() + " (" + user.getUserID() + ")");
-        holder.contactView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Context context = holder.contactID.getContext();
-                Intent intent = new Intent(context, ChatActivity.class);
-//                Intent intent = new Intent(context, TestActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putString("userID", user.getUserID());
-                bundle.putString("username", user.getUsername());
-                intent.putExtras(bundle);
-                context.startActivity(intent);
-                Toast.makeText(context, "click " + user.getUserID(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        
     }
 
     @Override
@@ -70,14 +75,13 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        View contactView;
         ImageView contactImage;
         TextView contactID;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            contactView = itemView;
             contactImage = itemView.findViewById(R.id.image_contact);
             contactID = itemView.findViewById(R.id.textview_contact);
         }
     }
+    
 }

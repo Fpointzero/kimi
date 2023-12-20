@@ -23,6 +23,7 @@ import xyz.fpointzero.android.network.MyWebSocket;
 import xyz.fpointzero.android.network.ClientWebSocketManager;
 
 public class TestFragment extends Fragment {
+    private static TestFragment instance;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -66,5 +67,11 @@ public class TestFragment extends Fragment {
         });
 
         return view;
+    }
+
+    public static TestFragment getInstance() {
+        if (instance == null)
+            instance = new TestFragment();
+        return instance;
     }
 }

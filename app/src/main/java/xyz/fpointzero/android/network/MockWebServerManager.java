@@ -1,5 +1,6 @@
 package xyz.fpointzero.android.network;
 
+import android.content.ContentValues;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -10,6 +11,7 @@ import com.alibaba.fastjson.JSON;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.litepal.LitePal;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -130,11 +132,6 @@ public class MockWebServerManager {
     };
     private WebSocketListener serverWebSocketListener = new WebSocketListener() {
         @Override
-        public void onClosing(@NotNull okhttp3.WebSocket webSocket, int code, @NotNull String reason) {
-            super.onClosing(webSocket, code, reason);
-        }
-
-        @Override
         public void onFailure(@NotNull okhttp3.WebSocket webSocket, @NotNull Throwable t, @Nullable Response response) {
             super.onFailure(webSocket, t, response);
             Set<String> keys = connectWebSocketMap.keySet();
@@ -148,29 +145,28 @@ public class MockWebServerManager {
         }
 
         @Override
-        public void onOpen(@NotNull WebSocket webSocket, @NotNull Response response) {
-            super.onOpen(webSocket, response);
-            //有客户端连接时回调
-            Log.e(TAG, "Server: Client Connect!");
-//            webSocket.send("我是服务器，你好呀");
-//            final String msg = Message.getConnectMessage().toString();
-//            send(msg);
-
-        }
-
-        @Override
         public void onMessage(@NotNull WebSocket webSocket, @NotNull String text) {
             super.onMessage(webSocket, text);
             try {
                 Log.d(TAG, "onMessage: " + text);
                 Message data = JSON.parseObject(text, Message.class);
-                User user = new User(data.getUserID(), data.getIp());
+                User user = new User(data.getUserID(), data.getUsername(), data.getIp());
+                // 每次连接都要更新对方状态（包括名字，IP这两个）
+                try {
+                    user.save();
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put("username", data.getUsername());
+                    contentValues.put("ip", data.getIp());
+                    LitePal.updateAll(User.class, contentValues, "userid = ?", data.getUserID());
+                } catch (Exception e) {
+                    Log.e(TAG, "onMessage: ", e);
+                }
+                
                 if (Type.DATA_CONNECT == data.getAction()) {
                     if (UserUtil.isInBlackList(user)) {
                         webSocket.close(ErrorType.CONNECT_REFUSE, "连接已拒绝");
                         return;
                     }
-                    user.saveOrUpdate("userid = ?", user.getUserID());
                     // 将连接加入到管理中
                     MyWebSocket tmp = new MyWebSocket(webSocket, RSAUtil.publicKeyFromString(data.getMsg()));
                     // 如果不存在则插入，存在则不变
@@ -178,7 +174,7 @@ public class MockWebServerManager {
                     webSocket.send(Message.getConnectMessage().toString());
                 }
                 if (data.getAction() == Type.DATA_ADD) {
-                    if(!UserUtil.isInWhiteList(user))
+                    if (!UserUtil.isInWhiteList(user))
                         ClientWebSocketManager.getInstance().onWSDataChanged(Type.SERVER, data);
                     else
                         webSocket.send(new Message(Type.DATA_ADD, "success").toString());

@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
@@ -34,6 +35,7 @@ public class ChatActivity extends BaseActivity {
     private ChatMessageAdapter chatMessageAdapter;
     String userID;
     String username;
+    String ip;
     TextView tvUsername;
     TextView tvStatus;
     MyWebSocket socket;
@@ -61,6 +63,7 @@ public class ChatActivity extends BaseActivity {
             Bundle bundle = intent.getExtras();
             userID = bundle.getString("userID");
             username = bundle.getString("username");
+            ip = bundle.getString("ip");
             chatMessageList = LitePal.where("sender = ? or receiver = ?", userID, userID).find(ChatMessage.class);
             RecyclerView recyclerView = (RecyclerView) findViewById(R.id.activity_chat_recyclerview);
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -73,7 +76,7 @@ public class ChatActivity extends BaseActivity {
             tvUsername = findViewById(R.id.tv_username);
             tvStatus = findViewById(R.id.tv_status);
             tvUsername.setText(username);
-            
+
             // 判断是否在线 TODO:动态刷新
             MyWebSocket socket1 = MockWebServerManager.getInstance().getServerWS(userID);
             MyWebSocket socket2 = ClientWebSocketManager.getInstance().getClientWS(userID);
@@ -83,12 +86,11 @@ public class ChatActivity extends BaseActivity {
                 socket = socket2;
             else
                 socket = null;
-            
+
             if (socket == null) {
                 tvStatus.setTextColor(R.color.red);
                 tvStatus.setText("offline");
-            }
-            else {
+            } else {
                 tvStatus.setTextColor(R.color.green);
                 tvStatus.setText("online");
             }
@@ -116,10 +118,15 @@ public class ChatActivity extends BaseActivity {
         } else if (itemID == R.id.option_connect) {
             if (socket == null) {
                 // TODO:修改内容
-                ClientWebSocketManager.getInstance().createClientWS("ws://192.168.31.41:10808/webSocket");
+                new Thread(() -> {
+                    ClientWebSocketManager.getInstance().createClientWS(String.format("ws://%s/webSocket", ip));
+                    runOnUiThread(() -> {
+                        Toast.makeText(ChatActivity.this, "连接", Toast.LENGTH_SHORT).show();
+                    }); 
+                }).start();
             }
         }
         return true;
     }
-    
+
 }

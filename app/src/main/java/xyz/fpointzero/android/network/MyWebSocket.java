@@ -1,5 +1,6 @@
 package xyz.fpointzero.android.network;
 
+import android.content.ContentValues;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -10,6 +11,7 @@ import com.alibaba.fastjson.JSON;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.litepal.LitePal;
 
 import java.security.PublicKey;
 import java.util.Set;
@@ -23,9 +25,11 @@ import okhttp3.WebSocketListener;
 import okio.ByteString;
 import xyz.fpointzero.android.constants.Type;
 import xyz.fpointzero.android.constants.ErrorType;
+import xyz.fpointzero.android.data.User;
 import xyz.fpointzero.android.utils.crypto.MD5Util;
 import xyz.fpointzero.android.utils.data.SettingUtil;
 import xyz.fpointzero.android.utils.crypto.RSAUtil;
+import xyz.fpointzero.android.utils.data.UserUtil;
 
 public class MyWebSocket {
     public static final String TAG = "MyWebSocket";
@@ -171,6 +175,16 @@ public class MyWebSocket {
             Log.e(TAG + ":Debug", "客户端收到消息:" + text);
             try {
                 xyz.fpointzero.android.network.Message data = JSON.parseObject(text, xyz.fpointzero.android.network.Message.class);
+                User user = new User(data.getUserID(), data.getUsername(), data.getIp());
+                try {
+                    user.save();
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put("username", data.getUsername());
+                    contentValues.put("ip", data.getIp());
+                    LitePal.updateAll(User.class, contentValues, "userid = ?", data.getUserID());
+                } catch (Exception e) {
+                    Log.e(TAG, "onMessage: ", e);
+                }
                 if (Type.DATA_CONNECT == data.getAction()) {
                     //主动发送心跳包
                     isReceivePong = true;
