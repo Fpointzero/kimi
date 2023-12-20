@@ -5,14 +5,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
 
-import java.nio.charset.StandardCharsets;
-
 import xyz.fpointzero.android.R;
-import xyz.fpointzero.android.constants.Type;
+import xyz.fpointzero.android.constants.DataType;
 import xyz.fpointzero.android.layout.TitleChildBar;
 import xyz.fpointzero.android.network.Message;
 import xyz.fpointzero.android.network.MyWebSocket;
@@ -50,7 +47,7 @@ public class AddFriendActivity extends BaseActivity implements View.OnClickListe
 
             String finalUrl = url;
             MyWebSocket myWebSocket = ClientWebSocketManager.getInstance().createClientWS(finalUrl);
-            myWebSocket.send(new Message(Type.DATA_ADD, "request").toString());
+            myWebSocket.send(new Message(DataType.DATA_ADD, "request").toString());
             
         } catch (Exception e) {
             Log.e(TAG, "onClick: " + e.getMessage(), e);

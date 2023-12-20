@@ -55,7 +55,6 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
                 bundle.putString("ip", user.getIp());
                 intent.putExtras(bundle);
                 context.startActivity(intent);
-                Toast.makeText(context, "click " + user.getUserID(), Toast.LENGTH_SHORT).show();
             }
         });
         return holder;
@@ -65,7 +64,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         User user = contactList.get(position);
-        holder.contactID.setText(user.getUsername() + " (" + user.getUserID() + ")");
+        holder.contactID.setText(user.getUsername() + "\n(" + user.getUserID() + ")\n" + user.getIp());
         
     }
 

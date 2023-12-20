@@ -23,8 +23,9 @@ import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import okio.ByteString;
-import xyz.fpointzero.android.constants.Type;
-import xyz.fpointzero.android.constants.ErrorType;
+import xyz.fpointzero.android.constants.DataType;
+import xyz.fpointzero.android.constants.ConnectType;
+import xyz.fpointzero.android.data.ChatMessage;
 import xyz.fpointzero.android.data.User;
 import xyz.fpointzero.android.utils.crypto.MD5Util;
 import xyz.fpointzero.android.utils.data.SettingUtil;
@@ -41,6 +42,7 @@ public class MyWebSocket {
 
     /**
      * 客户端创建webSocket
+     *
      * @param url
      */
     public MyWebSocket(String url) {
@@ -54,6 +56,7 @@ public class MyWebSocket {
 
     /**
      * 服务端的 webSocket
+     *
      * @param webSocket
      * @param publicKey
      */
@@ -97,8 +100,7 @@ public class MyWebSocket {
         if (publicKey != null) {
             ByteString message = new ByteString(RSAUtil.encrypt(msg, publicKey));
             send(message);
-        }
-        else
+        } else
             throw new Exception("MyWebSocket's publicKey is null!!!!");
     }
 
@@ -106,7 +108,7 @@ public class MyWebSocket {
         @Override
         public boolean handleMessage(@NonNull android.os.Message msg) {
             if (msg.what != 10) return false;
-            final String message = new xyz.fpointzero.android.network.Message(Type.DATA_PING, "ping").toString();
+            final String message = new xyz.fpointzero.android.network.Message(DataType.DATA_PING, "ping").toString();
             if (isReceivePong) {
                 try {
                     sendByEncrypt(message.getBytes());
@@ -117,7 +119,7 @@ public class MyWebSocket {
                 heartHandler.sendEmptyMessageDelayed(10, 20000);
             } else {
                 //没有收到pong命令，进行重连
-                disconnect(ErrorType.CONNECT_CLOSE, "断线重连");
+                disconnect(ConnectType.CONNECT_CLOSE, "断线重连");
             }
             return false;
         }
@@ -185,7 +187,7 @@ public class MyWebSocket {
                 } catch (Exception e) {
                     Log.e(TAG, "onMessage: ", e);
                 }
-                if (Type.DATA_CONNECT == data.getAction()) {
+                if (DataType.DATA_CONNECT == data.getAction()) {
                     //主动发送心跳包
                     isReceivePong = true;
                     heartHandler.sendEmptyMessage(10);
@@ -193,11 +195,11 @@ public class MyWebSocket {
                     if (ClientWebSocketManager.getClientWebSocketMap().get(data.getUserID()) == null)
                         ClientWebSocketManager.getInstance().putIfAbsent(data.getUserID(), MyWebSocket.this);
                     else
-                        webSocket.close(ErrorType.CONNECT_CLOSE, "重复的连接");
+                        webSocket.close(ConnectType.CONNECT_CLOSE, "重复的连接");
                     return;
                 }
-                if (data.getAction() == Type.DATA_ADD) {
-                    ClientWebSocketManager.getInstance().onWSDataChanged(Type.CLIENT, data);
+                if (data.getAction() == DataType.DATA_ADD) {
+                    ClientWebSocketManager.getInstance().onWSDataChanged(DataType.CLIENT, data);
                 }
             } catch (Exception e) {
                 Log.e(TAG, "onMessage:", e);
@@ -211,16 +213,25 @@ public class MyWebSocket {
             try {
                 String text = new String(RSAUtil.decrypt(bytes.toByteArray(), SettingUtil.getInstance().getSetting().getPrivateKey()));
                 Log.d(TAG, "onMessage(Byte): " + text);
-                
+
                 Message data = JSON.parseObject(text, Message.class);
-                
-                if (Type.DATA_PING == data.getAction()) {
+                User user = new User(data.getUserID(), data.getUsername(), data.getIp());
+                if (DataType.DATA_PING == data.getAction()) {
                     isReceivePong = true;
                     return;
                 }
-                
-                if (Type.DATA_ERROR == data.getAction()) {
-                    webSocket.close(ErrorType.CONNECT_REFUSE, "error");
+                if (UserUtil.isInWhiteList(user)) {
+                    if (DataType.DATA_PRIVATE == data.getAction()) {
+                        new ChatMessage(user.getUserID(), SettingUtil.getInstance().getSetting().getUserID(), data.getMsg(), System.currentTimeMillis()).save();
+                        return;
+                    }
+                    ClientWebSocketManager.getInstance().onWSDataChanged(DataType.CLIENT, data);
+//                        onWSDataChanged(DataType.DATA_RECEIVE, data);
+                    return;
+                }
+
+                if (DataType.DATA_ERROR == data.getAction()) {
+                    webSocket.close(ConnectType.CONNECT_REFUSE, "error");
                     return;
                 }
             } catch (Exception e) {
@@ -236,7 +247,7 @@ public class MyWebSocket {
             mWebSocket = webSocket;
 
             // 交换公钥
-            final String msg = JSON.toJSONString(new xyz.fpointzero.android.network.Message(Type.DATA_CONNECT, RSAUtil.publicKeyToString(SettingUtil.getInstance().getSetting().getPublicKey())));
+            final String msg = JSON.toJSONString(new xyz.fpointzero.android.network.Message(DataType.DATA_CONNECT, RSAUtil.publicKeyToString(SettingUtil.getInstance().getSetting().getPublicKey())));
             send(msg);
             Log.d(TAG, "onOpen: " + msg);
         }
@@ -267,7 +278,7 @@ public class MyWebSocket {
     public String getWsURL() {
         return wsURL;
     }
-    
+
     public String getUserID() {
         if (publicKey != null)
             return MD5Util.stringToMD5(RSAUtil.publicKeyToString(publicKey));

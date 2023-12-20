@@ -41,7 +41,7 @@
         <!--            android:layout_height="wrap_content"-->
         <!--            tools:ignore="MissingConstraints" />-->
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_contact"
+            android:id="@+id/recyclerview_contact"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1" />

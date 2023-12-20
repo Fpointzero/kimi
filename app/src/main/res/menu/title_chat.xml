@@ -4,7 +4,9 @@
         android:id="@+id/option_connect"
         android:title="@string/connect" />
     <item
+        android:id="@+id/option_disconnect"
+        android:title="@string/disconnect" />
+    <item
         android:id="@+id/option_remove"
-        android:icon="@drawable/ic_user_24"
         android:title="@string/remove_friend" />
 </menu>

@@ -1,8 +1,6 @@
 package xyz.fpointzero.android.network;
 
 import android.content.ContentValues;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -29,8 +27,9 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import okio.ByteString;
-import xyz.fpointzero.android.constants.ErrorType;
-import xyz.fpointzero.android.constants.Type;
+import xyz.fpointzero.android.constants.ConnectType;
+import xyz.fpointzero.android.constants.DataType;
+import xyz.fpointzero.android.data.ChatMessage;
 import xyz.fpointzero.android.data.User;
 import xyz.fpointzero.android.utils.data.UserUtil;
 import xyz.fpointzero.android.utils.data.SettingUtil;
@@ -161,10 +160,10 @@ public class MockWebServerManager {
                 } catch (Exception e) {
                     Log.e(TAG, "onMessage: ", e);
                 }
-                
-                if (Type.DATA_CONNECT == data.getAction()) {
+
+                if (DataType.DATA_CONNECT == data.getAction()) {
                     if (UserUtil.isInBlackList(user)) {
-                        webSocket.close(ErrorType.CONNECT_REFUSE, "连接已拒绝");
+                        webSocket.close(ConnectType.CONNECT_REFUSE, "连接已拒绝");
                         return;
                     }
                     // 将连接加入到管理中
@@ -173,11 +172,11 @@ public class MockWebServerManager {
                     connectWebSocketMap.putIfAbsent(user.getUserID(), tmp);
                     webSocket.send(Message.getConnectMessage().toString());
                 }
-                if (data.getAction() == Type.DATA_ADD) {
+                if (data.getAction() == DataType.DATA_ADD) {
                     if (!UserUtil.isInWhiteList(user))
-                        ClientWebSocketManager.getInstance().onWSDataChanged(Type.SERVER, data);
+                        ClientWebSocketManager.getInstance().onWSDataChanged(DataType.SERVER, data);
                     else
-                        webSocket.send(new Message(Type.DATA_ADD, "success").toString());
+                        webSocket.send(new Message(DataType.DATA_ADD, "success").toString());
                 }
 
             } catch (Exception e) {
@@ -196,19 +195,20 @@ public class MockWebServerManager {
                 Log.d(TAG, "onMessage(Byte): " + text);
 
                 Message data = JSON.parseObject(text, Message.class);
-                User user = new User(data.getUserID(), data.getIp());
-                ClientWebSocketManager.getInstance().onWSDataChanged(Type.SERVER, data);
-                if (Type.DATA_PING == data.getAction()) {
-                    final String message = JSON.toJSONString(new Message(Type.DATA_PING, "pong response"));
-                    connectWebSocketMap.get(user.getUserID()).sendByEncrypt(new Message(Type.DATA_PING, "ping").toString().getBytes(StandardCharsets.UTF_8));
+                User user = new User(data.getUserID(), data.getUsername(), data.getIp());
+
+                if (DataType.DATA_PING == data.getAction()) {
+//                    final String message = JSON.toJSONString(new Message(Type.DATA_PING, "pong response"));
+                    connectWebSocketMap.get(user.getUserID()).sendByEncrypt(new Message(DataType.DATA_PING, "ping").toString().getBytes(StandardCharsets.UTF_8));
                     return;
                 }
 
                 if (UserUtil.isInWhiteList(user)) {
-                    if (Type.DATA_PRIVATE == data.getAction()) {
+                    if (DataType.DATA_PRIVATE == data.getAction()) {
+                        new ChatMessage(user.getUserID(), SettingUtil.getInstance().getSetting().getUserID(), data.getMsg(), System.currentTimeMillis()).save();
                         return;
                     }
-                    ClientWebSocketManager.getInstance().onWSDataChanged(Type.SERVER, data);
+                    ClientWebSocketManager.getInstance().onWSDataChanged(DataType.SERVER, data);
 //                        onWSDataChanged(DataType.DATA_RECEIVE, data);
                     return;
                 }

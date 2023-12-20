@@ -50,6 +50,6 @@ public class SettingUtil {
     }
 
     public Setting getSetting() {
-        return setting;
+        return instance.setting;
     }
 }

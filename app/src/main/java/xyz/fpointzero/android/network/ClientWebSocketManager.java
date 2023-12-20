@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 import okio.ByteString;
-import xyz.fpointzero.android.constants.ErrorType;
-import xyz.fpointzero.android.utils.data.UserUtil;
+import xyz.fpointzero.android.constants.ConnectType;
 
 
 public class ClientWebSocketManager {
@@ -61,7 +60,7 @@ public class ClientWebSocketManager {
     public void closeAll() {
         Set<String> keys = clientWebSocketMap.keySet();
         for (String key : keys) {
-            clientWebSocketMap.get(key).disconnect(ErrorType.CONNECT_CLOSE, "客户端已关闭");
+            clientWebSocketMap.get(key).disconnect(ConnectType.CONNECT_CLOSE, "客户端已关闭");
         }
     }
 

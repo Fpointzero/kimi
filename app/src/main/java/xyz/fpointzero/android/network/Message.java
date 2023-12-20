@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.alibaba.fastjson.JSONObject;
 
-import xyz.fpointzero.android.constants.Type;
+import xyz.fpointzero.android.constants.DataType;
 import xyz.fpointzero.android.utils.data.SettingUtil;
 import xyz.fpointzero.android.utils.crypto.RSAUtil;
 import xyz.fpointzero.android.utils.network.NetworkUtil;
@@ -117,11 +117,12 @@ public class Message {
 //    }
 
     public static Message getConnectMessage() {
-        Message connectMsg = new Message();
-        connectMsg.setAction(Type.DATA_CONNECT);
-        connectMsg.setUserID(SettingUtil.getInstance().getSetting().getUserID());
-        connectMsg.setUsername(SettingUtil.getInstance().getSetting().getUsername());
-        connectMsg.setMsg(RSAUtil.publicKeyToString(SettingUtil.getInstance().getSetting().getPublicKey()));
+        Message connectMsg = new Message(DataType.DATA_CONNECT, RSAUtil.publicKeyToString(SettingUtil.getInstance().getSetting().getPublicKey()));
+        
+//        connectMsg.setAction(Type.DATA_CONNECT);
+//        connectMsg.setUserID(SettingUtil.getInstance().getSetting().getUserID());
+//        connectMsg.setUsername(SettingUtil.getInstance().getSetting().getUsername());
+//        connectMsg.setMsg(RSAUtil.publicKeyToString(SettingUtil.getInstance().getSetting().getPublicKey()));
 //        this.setPublicKey(SettingUtil.getInstance().getSetting().getPublicKey());
         return connectMsg;
     }

@@ -16,7 +16,7 @@ import com.alibaba.fastjson.JSON;
 import java.nio.charset.StandardCharsets;
 
 import xyz.fpointzero.android.R;
-import xyz.fpointzero.android.constants.Type;
+import xyz.fpointzero.android.constants.DataType;
 import xyz.fpointzero.android.network.Message;
 import xyz.fpointzero.android.network.MockWebServerManager;
 import xyz.fpointzero.android.network.MyWebSocket;
@@ -44,7 +44,7 @@ public class TestFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 final String msg;
-                msg = JSON.toJSONString(new Message(Type.DATA_PING, editText.getText().toString()));
+                msg = JSON.toJSONString(new Message(DataType.DATA_PING, editText.getText().toString()));
                 try {
                     MockWebServerManager.getInstance().sendAll(msg.getBytes(StandardCharsets.UTF_8));
                 } catch (Exception e) {
@@ -56,7 +56,7 @@ public class TestFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 final String msg;
-                msg = JSON.toJSONString(new Message(Type.DATA_PING, editText.getText().toString()));
+                msg = JSON.toJSONString(new Message(DataType.DATA_PING, editText.getText().toString()));
                 try {
                     ClientWebSocketManager.getInstance().sendAllByEncrypt(msg.getBytes(StandardCharsets.UTF_8));
                 } catch (Exception e) {

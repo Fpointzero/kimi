@@ -6,6 +6,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,46 +19,85 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.litepal.LitePal;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import xyz.fpointzero.android.R;
 import xyz.fpointzero.android.adapters.ChatMessageAdapter;
+import xyz.fpointzero.android.constants.ConnectType;
+import xyz.fpointzero.android.constants.DataType;
 import xyz.fpointzero.android.data.ChatMessage;
 import xyz.fpointzero.android.fragments.ContactFragment;
-import xyz.fpointzero.android.layout.TitleChildBar;
 import xyz.fpointzero.android.network.ClientWebSocketManager;
+import xyz.fpointzero.android.network.Message;
 import xyz.fpointzero.android.network.MockWebServerManager;
 import xyz.fpointzero.android.network.MyWebSocket;
 import xyz.fpointzero.android.utils.activity.ActivityUtil;
+import xyz.fpointzero.android.utils.data.SettingUtil;
 import xyz.fpointzero.android.utils.data.UserUtil;
 
-public class ChatActivity extends BaseActivity {
+public class ChatActivity extends BaseActivity implements View.OnClickListener, View.OnFocusChangeListener {
     public static final String TAG = "ChatActivity";
     private List<ChatMessage> chatMessageList;
     private ChatMessageAdapter chatMessageAdapter;
+
+    Thread flushThread;
     String userID;
     String username;
     String ip;
     TextView tvUsername;
     TextView tvStatus;
     MyWebSocket socket;
+    RecyclerView recyclerView;
+    ImageView uploadImg;
+    ImageView btnSend;
+    EditText input;
 
-    @SuppressLint("UseSupportActionBar")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         ActivityUtil.getInstance().getMap().put(TAG, this);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_test);
+        setContentView(R.layout.activity_chat);
         Toolbar toolbar = findViewById(R.id.title_bar);
 //        setActionBar(toolbar);
+        // 初始化标题栏
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+        // 初始化数据
         init();
+
+        // 注册事件
+        input = findViewById(R.id.input);
+        input.setOnFocusChangeListener(this);
+
+        uploadImg = findViewById(R.id.upload_image);
+        btnSend = findViewById(R.id.send);
+        uploadImg.setOnClickListener(this);
+        btnSend.setOnClickListener(this);
+
+        // 动态更新线程
+        flushThread = new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(2000);
+                    chatMessageList = LitePal.where("sender = ? or receiver = ?", userID, userID).find(ChatMessage.class);
+                    chatMessageAdapter.setChatMsgList(chatMessageList);
+                    runOnUiThread(() -> {
+                        flushStatus();
+                        chatMessageAdapter.notifyDataSetChanged();
+                    });
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        flushThread.start();
+        
+        // TODO:来新消息提示
     }
 
-    @SuppressLint("ResourceAsColor")
     private void init() {
         Intent intent = getIntent();
         try {
@@ -64,10 +106,11 @@ public class ChatActivity extends BaseActivity {
             userID = bundle.getString("userID");
             username = bundle.getString("username");
             ip = bundle.getString("ip");
-            chatMessageList = LitePal.where("sender = ? or receiver = ?", userID, userID).find(ChatMessage.class);
-            RecyclerView recyclerView = (RecyclerView) findViewById(R.id.activity_chat_recyclerview);
+            recyclerView = (RecyclerView) findViewById(R.id.activity_chat_recyclerview);
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
             recyclerView.setLayoutManager(linearLayoutManager);
+
+            chatMessageList = LitePal.where("sender = ? or receiver = ?", userID, userID).order("timestamp").find(ChatMessage.class);
             chatMessageAdapter = new ChatMessageAdapter(chatMessageList);
             recyclerView.setAdapter(chatMessageAdapter);
             // init view
@@ -77,26 +120,32 @@ public class ChatActivity extends BaseActivity {
             tvStatus = findViewById(R.id.tv_status);
             tvUsername.setText(username);
 
-            // 判断是否在线 TODO:动态刷新
-            MyWebSocket socket1 = MockWebServerManager.getInstance().getServerWS(userID);
-            MyWebSocket socket2 = ClientWebSocketManager.getInstance().getClientWS(userID);
-            if (socket1 != null)
-                socket = socket1;
-            else if (socket2 != null)
-                socket = socket2;
-            else
-                socket = null;
-
-            if (socket == null) {
-                tvStatus.setTextColor(R.color.red);
-                tvStatus.setText("offline");
-            } else {
-                tvStatus.setTextColor(R.color.green);
-                tvStatus.setText("online");
-            }
+            flushStatus();
+            recyclerView.scrollToPosition(chatMessageList.size() - 1); // 滚动到最底部
         } catch (Exception e) {
             Log.e(TAG, "initData: " + e.getMessage(), e);
             finish();
+        }
+    }
+
+    @SuppressLint("ResourceAsColor")
+    private void flushStatus() {
+        // 判断是否在线 
+        MyWebSocket socket1 = MockWebServerManager.getInstance().getServerWS(userID);
+        MyWebSocket socket2 = ClientWebSocketManager.getInstance().getClientWS(userID);
+        if (socket1 != null)
+            socket = socket1;
+        else if (socket2 != null)
+            socket = socket2;
+        else
+            socket = null;
+
+        if (socket == null) {
+            tvStatus.setTextColor(R.color.red);
+            tvStatus.setText("离线");
+        } else {
+            tvStatus.setTextColor(R.color.green);
+            tvStatus.setText("在线");
         }
     }
 
@@ -116,17 +165,62 @@ public class ChatActivity extends BaseActivity {
             finish();
             ContactFragment.flushContactList();
         } else if (itemID == R.id.option_connect) {
+            flushStatus();
             if (socket == null) {
-                // TODO:修改内容
                 new Thread(() -> {
                     ClientWebSocketManager.getInstance().createClientWS(String.format("ws://%s/webSocket", ip));
                     runOnUiThread(() -> {
                         Toast.makeText(ChatActivity.this, "连接", Toast.LENGTH_SHORT).show();
-                    }); 
+                    });
                 }).start();
+            }
+        } else if (itemID == R.id.option_disconnect) {
+            flushStatus();
+            if (socket != null) {
+                socket.disconnect(ConnectType.CONNECT_CLOSE, "主动断开");
             }
         }
         return true;
     }
 
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        flushStatus();
+        if (socket == null)
+            return;
+        if (id == R.id.upload_image) {
+
+        } else if (id == R.id.send) {
+            Toast.makeText(this, "发送成功", Toast.LENGTH_SHORT).show();
+            try {
+                String msg = input.getText().toString();
+                if (!"".equals(msg)) {
+                    new ChatMessage(SettingUtil.getInstance().getSetting().getUserID(), userID, msg, System.currentTimeMillis()).save();
+                    socket.sendByEncrypt(new Message(DataType.DATA_PRIVATE, msg).toString().getBytes(StandardCharsets.UTF_8));
+                    chatMessageList = LitePal.where("sender = ? or receiver = ?", userID, userID).find(ChatMessage.class);
+                    chatMessageAdapter.setChatMsgList(chatMessageList);
+                    chatMessageAdapter.notifyDataSetChanged();
+                    input.setText("");
+                    recyclerView.scrollToPosition(chatMessageList.size() - 1);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    @Override
+    public void onFocusChange(View v, boolean hasFocus) {
+        int id = v.getId();
+        if (id == R.id.input) {
+            if (hasFocus) {
+                uploadImg.setVisibility(View.GONE);
+                btnSend.setVisibility(View.VISIBLE);
+            } else {
+                btnSend.setVisibility(View.GONE);
+                uploadImg.setVisibility(View.VISIBLE);
+            }
+        }
+    }
 }

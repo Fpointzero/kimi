@@ -24,6 +24,10 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
         chatMsgList = list;
     }
 
+    public void setChatMsgList(List<ChatMessage> chatMsgList) {
+        this.chatMsgList = chatMsgList;
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -89,5 +93,10 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
             leftImg = itemView.findViewById(R.id.left_image);
             rightImg = itemView.findViewById(R.id.right_image);
         }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
     }
 }

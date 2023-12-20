@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -40,7 +39,7 @@ public class ContactFragment extends Fragment implements View.OnClickListener {
         btnSearch.setOnClickListener(this);
         // 列表
         contactList = UserUtil.getWhiteList();
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_contact);
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_contact);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(requireActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
         contactAdapter = new ContactAdapter(contactList);

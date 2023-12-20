@@ -27,7 +27,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            app:cardCornerRadius="10dp">
+            app:cardCornerRadius="10dp"
+            android:backgroundTint="#FFFFFF">
 
             <TextView
                 android:id="@+id/left_content"
@@ -79,7 +80,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                app:cardCornerRadius="10dp">
+                app:cardCornerRadius="10dp"
+                android:backgroundTint="@color/salmon">
 
 
                 <ImageView

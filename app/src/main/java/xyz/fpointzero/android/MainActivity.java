@@ -14,7 +14,7 @@ import java.io.IOException;
 import xyz.fpointzero.android.data.User;
 import xyz.fpointzero.android.utils.activity.ActivityUtil;
 import xyz.fpointzero.android.activities.BaseActivity;
-import xyz.fpointzero.android.constants.Type;
+import xyz.fpointzero.android.constants.DataType;
 import xyz.fpointzero.android.fragments.MessageFragment;
 import xyz.fpointzero.android.network.Message;
 import xyz.fpointzero.android.network.MockWebServerManager;
@@ -60,11 +60,11 @@ public class MainActivity extends BaseActivity implements ClientWebSocketManager
     @Override
     public void onWebSocketData(int type, Message data) {
         Log.d(TAG, "onWebSocketData: Type: " + type + " Receive data: " + data.toString());
-        if (type == Type.SERVER) {
-            if (data.getAction() == Type.DATA_ADD && data.getMsg().equals("request"))
+        if (type == DataType.SERVER) {
+            if (data.getAction() == DataType.DATA_ADD && data.getMsg().equals("request"))
                 DialogUtil.showConnectDialog(MainActivity.this, data);
-        } else if (type == Type.CLIENT) {
-            if (data.getAction() == Type.DATA_ADD && data.getMsg().equals("success")) {
+        } else if (type == DataType.CLIENT) {
+            if (data.getAction() == DataType.DATA_ADD && data.getMsg().equals("success")) {
                 DialogUtil.showSuccessDialog(MainActivity.this, data.getUsername() + " (" + data.getUserID() +") 已同意");
                 ContentValues contentValues = new ContentValues();
                 contentValues.put("isWhite", "1");
