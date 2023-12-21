@@ -3,7 +3,6 @@ package xyz.fpointzero.android.activities;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -34,7 +33,7 @@ import xyz.fpointzero.android.constants.DataType;
 import xyz.fpointzero.android.data.ChatMessage;
 import xyz.fpointzero.android.data.User;
 import xyz.fpointzero.android.network.ClientWebSocketManager;
-import xyz.fpointzero.android.network.Message;
+import xyz.fpointzero.android.data.Message;
 import xyz.fpointzero.android.network.MockWebServerManager;
 import xyz.fpointzero.android.network.MyWebSocket;
 import xyz.fpointzero.android.utils.activity.ActivityUtil;
@@ -196,8 +195,6 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
             }
         });
         flushThread.start();
-
-        // TODO:来新消息提示
     }
     
     private void initRecyclerViewData() {

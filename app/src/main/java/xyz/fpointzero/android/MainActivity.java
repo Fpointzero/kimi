@@ -16,7 +16,7 @@ import xyz.fpointzero.android.utils.activity.ActivityUtil;
 import xyz.fpointzero.android.activities.BaseActivity;
 import xyz.fpointzero.android.constants.DataType;
 import xyz.fpointzero.android.fragments.MessageFragment;
-import xyz.fpointzero.android.network.Message;
+import xyz.fpointzero.android.data.Message;
 import xyz.fpointzero.android.network.MockWebServerManager;
 import xyz.fpointzero.android.network.ClientWebSocketManager;
 import xyz.fpointzero.android.utils.activity.DialogUtil;

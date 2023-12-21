@@ -1,15 +1,6 @@
 package xyz.fpointzero.android.data;
 
-import android.annotation.SuppressLint;
-import android.database.Cursor;
-
-import org.litepal.LitePal;
 import org.litepal.crud.LitePalSupport;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import xyz.fpointzero.android.network.Message;
 
 public class ChatMessage extends LitePalSupport {
     private String userid;

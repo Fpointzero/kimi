@@ -8,8 +8,7 @@ import org.litepal.LitePal;
 import java.util.ArrayList;
 import java.util.List;
 
-import xyz.fpointzero.android.data.ChatMessage;
-import xyz.fpointzero.android.network.Message;
+import xyz.fpointzero.android.data.Message;
 
 public class MessageUtil {
     private static final String TAG = "MessageUtil";

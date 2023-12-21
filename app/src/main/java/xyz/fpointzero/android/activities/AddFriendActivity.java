@@ -11,7 +11,7 @@ import androidx.appcompat.widget.Toolbar;
 import xyz.fpointzero.android.R;
 import xyz.fpointzero.android.constants.DataType;
 import xyz.fpointzero.android.layout.TitleChildBar;
-import xyz.fpointzero.android.network.Message;
+import xyz.fpointzero.android.data.Message;
 import xyz.fpointzero.android.network.MyWebSocket;
 import xyz.fpointzero.android.network.ClientWebSocketManager;
 import xyz.fpointzero.android.utils.activity.ActivityUtil;

@@ -15,10 +15,7 @@ import java.util.List;
 
 import xyz.fpointzero.android.R;
 import xyz.fpointzero.android.activities.ChatActivity;
-import xyz.fpointzero.android.data.ChatMessage;
-import xyz.fpointzero.android.data.User;
-import xyz.fpointzero.android.network.Message;
-import xyz.fpointzero.android.utils.data.UserUtil;
+import xyz.fpointzero.android.data.Message;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder>{
     private List<Message> messageList;

@@ -7,7 +7,7 @@ import android.content.DialogInterface;
 import xyz.fpointzero.android.constants.DataType;
 import xyz.fpointzero.android.data.User;
 import xyz.fpointzero.android.fragments.ContactFragment;
-import xyz.fpointzero.android.network.Message;
+import xyz.fpointzero.android.data.Message;
 import xyz.fpointzero.android.network.MockWebServerManager;
 
 public class DialogUtil {

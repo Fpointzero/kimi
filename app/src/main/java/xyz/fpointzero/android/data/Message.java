@@ -1,10 +1,11 @@
-package xyz.fpointzero.android.network;
+package xyz.fpointzero.android.data;
 
 import androidx.annotation.NonNull;
 
 import com.alibaba.fastjson.JSONObject;
 
 import xyz.fpointzero.android.constants.DataType;
+import xyz.fpointzero.android.network.MockWebServerManager;
 import xyz.fpointzero.android.utils.data.SettingUtil;
 import xyz.fpointzero.android.utils.crypto.RSAUtil;
 import xyz.fpointzero.android.utils.network.NetworkUtil;

@@ -12,6 +12,7 @@ import java.util.Set;
 
 import okio.ByteString;
 import xyz.fpointzero.android.constants.ConnectType;
+import xyz.fpointzero.android.data.Message;
 
 
 public class ClientWebSocketManager {
@@ -102,7 +103,7 @@ public class ClientWebSocketManager {
      * @param type
      * @param info
      */
-    public void onWSDataChanged(int type, final xyz.fpointzero.android.network.Message info) {
+    public void onWSDataChanged(int type, final Message info) {
         Iterator<WeakReference<WebSocketDataListener>> iterator = sWeakRefListeners.iterator();
         while (iterator.hasNext()) {
             WeakReference<WebSocketDataListener> ref = iterator.next();
@@ -160,7 +161,7 @@ public class ClientWebSocketManager {
 
 
     public interface WebSocketDataListener {
-        void onWebSocketData(int type, xyz.fpointzero.android.network.Message info);
+        void onWebSocketData(int type, Message info);
     }
     public static HashMap<String, MyWebSocket> getClientWebSocketMap() {
         return clientWebSocketMap;

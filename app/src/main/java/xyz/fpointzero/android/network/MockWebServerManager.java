@@ -30,6 +30,7 @@ import okio.ByteString;
 import xyz.fpointzero.android.constants.ConnectType;
 import xyz.fpointzero.android.constants.DataType;
 import xyz.fpointzero.android.data.ChatMessage;
+import xyz.fpointzero.android.data.Message;
 import xyz.fpointzero.android.data.User;
 import xyz.fpointzero.android.utils.data.UserUtil;
 import xyz.fpointzero.android.utils.data.SettingUtil;

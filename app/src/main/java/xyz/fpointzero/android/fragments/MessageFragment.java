@@ -13,17 +13,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.litepal.LitePal;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import xyz.fpointzero.android.R;
-import xyz.fpointzero.android.adapters.ContactAdapter;
 import xyz.fpointzero.android.adapters.MessageAdapter;
-import xyz.fpointzero.android.data.ChatMessage;
-import xyz.fpointzero.android.network.Message;
-import xyz.fpointzero.android.utils.data.UserUtil;
+import xyz.fpointzero.android.data.Message;
 import xyz.fpointzero.android.utils.network.MessageUtil;
 
 public class MessageFragment extends Fragment implements View.OnClickListener {

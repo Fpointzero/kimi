@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 
 import xyz.fpointzero.android.R;
 import xyz.fpointzero.android.constants.DataType;
-import xyz.fpointzero.android.network.Message;
+import xyz.fpointzero.android.data.Message;
 import xyz.fpointzero.android.network.MockWebServerManager;
 import xyz.fpointzero.android.network.MyWebSocket;
 import xyz.fpointzero.android.network.ClientWebSocketManager;

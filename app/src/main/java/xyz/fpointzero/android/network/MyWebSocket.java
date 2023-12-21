@@ -26,6 +26,7 @@ import okio.ByteString;
 import xyz.fpointzero.android.constants.DataType;
 import xyz.fpointzero.android.constants.ConnectType;
 import xyz.fpointzero.android.data.ChatMessage;
+import xyz.fpointzero.android.data.Message;
 import xyz.fpointzero.android.data.User;
 import xyz.fpointzero.android.utils.crypto.MD5Util;
 import xyz.fpointzero.android.utils.data.SettingUtil;
@@ -108,7 +109,7 @@ public class MyWebSocket {
         @Override
         public boolean handleMessage(@NonNull android.os.Message msg) {
             if (msg.what != 10) return false;
-            final String message = new xyz.fpointzero.android.network.Message(DataType.DATA_PING, "ping").toString();
+            final String message = new Message(DataType.DATA_PING, "ping").toString();
             if (isReceivePong) {
                 try {
                     sendByEncrypt(message.getBytes());
@@ -176,7 +177,7 @@ public class MyWebSocket {
             super.onMessage(webSocket, text);
             Log.e(TAG + ":Debug", "客户端收到消息:" + text);
             try {
-                xyz.fpointzero.android.network.Message data = JSON.parseObject(text, xyz.fpointzero.android.network.Message.class);
+                Message data = JSON.parseObject(text, Message.class);
                 User user = new User(data.getUserID(), data.getUsername(), data.getIp());
                 try {
                     user.save();
@@ -247,7 +248,7 @@ public class MyWebSocket {
             mWebSocket = webSocket;
 
             // 交换公钥
-            final String msg = JSON.toJSONString(new xyz.fpointzero.android.network.Message(DataType.DATA_CONNECT, RSAUtil.publicKeyToString(SettingUtil.getInstance().getSetting().getPublicKey())));
+            final String msg = JSON.toJSONString(new Message(DataType.DATA_CONNECT, RSAUtil.publicKeyToString(SettingUtil.getInstance().getSetting().getPublicKey())));
             send(msg);
             Log.d(TAG, "onOpen: " + msg);
         }
