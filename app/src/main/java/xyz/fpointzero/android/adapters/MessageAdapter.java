@@ -44,8 +44,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                 Intent intent = new Intent(context, ChatActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("userID", msg.getUserID());
-                bundle.putString("username", msg.getUsername());
-                bundle.putString("ip", msg.getIp());
                 intent.putExtras(bundle);
                 context.startActivity(intent);
             }

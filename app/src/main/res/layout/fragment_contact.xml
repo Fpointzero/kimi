@@ -25,7 +25,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:hint="@string/hint_search"
-                    android:background="@drawable/bg_edit"
+                    android:background="@drawable/bg_search_pink"
                     android:paddingHorizontal="5dp" />
             </LinearLayout>
 

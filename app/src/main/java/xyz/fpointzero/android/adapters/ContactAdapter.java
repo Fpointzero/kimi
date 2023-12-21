@@ -46,13 +46,11 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
             public void onClick(View v) {
                 int position = holder.getBindingAdapterPosition();
                 User user = contactList.get(position);
-                Context context = holder.contactID.getContext();
+                Context context = holder.itemView.getContext();
                 Intent intent = new Intent(context, ChatActivity.class);
 //                Intent intent = new Intent(context, TestActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("userID", user.getUserID());
-                bundle.putString("username", user.getUsername());
-                bundle.putString("ip", user.getIp());
                 intent.putExtras(bundle);
                 context.startActivity(intent);
             }
@@ -64,7 +62,9 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         User user = contactList.get(position);
-        holder.contactID.setText(user.getUsername() + "\n(" + user.getUserID() + ")\n" + user.getIp());
+        holder.username.setText(user.getUsername());
+        holder.userid.setText("(" + user.getUserID() + ")");
+        holder.ip.setText(user.getIp());
         
     }
 
@@ -74,12 +74,16 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView contactImage;
-        TextView contactID;
+        ImageView avatar;
+        TextView username;
+        TextView userid;
+        TextView ip;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            contactImage = itemView.findViewById(R.id.image_contact);
-            contactID = itemView.findViewById(R.id.textview_contact);
+            avatar = itemView.findViewById(R.id.avatar);
+            username = itemView.findViewById(R.id.tv_username);
+            userid = itemView.findViewById(R.id.tv_id);
+            ip = itemView.findViewById(R.id.tv_ip);
         }
     }
 

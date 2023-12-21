@@ -20,6 +20,7 @@ import xyz.fpointzero.android.utils.data.SettingUtil;
 public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.ViewHolder> {
     private List<ChatMessage> chatMsgList;
     
+    public ChatMessageAdapter(){}
     public ChatMessageAdapter(List<ChatMessage> list) {
         chatMsgList = list;
     }
@@ -95,8 +96,13 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
         }
     }
 
+    /**
+     * 解决复用导致长度不一致，因为消息是反着的recyclerView所以是getItemCount() - position - 1否则是position即可
+     * @param position position to query
+     * @return
+     */
     @Override
     public int getItemViewType(int position) {
-        return position;
+        return getItemCount() - position - 1;
     }
 }

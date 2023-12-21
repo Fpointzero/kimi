@@ -22,9 +22,9 @@ public class MessageUtil {
     public static List<Message> getMsgList() {
         List<Message> messageList = new ArrayList<Message>();
 //        Cursor cursor = LitePal.findBySQL("SELECT * from (SELECT * FROM `chatmessage` a LEFT JOIN user b ON a.userid = b.userid ORDER BY timestamp DESC) as t GROUP BY userid;");
-//        Cursor cursor = LitePal.findBySQL("SELECT * from (SELECT * from `chatmessage` AS a LEFT JOIN user AS b ON a.userid = b.userid ORDER BY timestamp ASC) as t GROUP BY userid ORDER BY timestamp DESC");
+        Cursor cursor = LitePal.findBySQL("SELECT * from (SELECT * from `chatmessage` AS a LEFT JOIN user AS b ON a.userid = b.userid ORDER BY timestamp ASC) as t GROUP BY userid ORDER BY timestamp DESC");
         // 为什么ASC反而变成了DESC ？ SQL语句要用DESC，但是这里用ASC;
-        Cursor cursor = LitePal.findBySQL("select * from (SELECT * FROM `chatmessage` as a LEFT JOIN user as b on a.userid = b.userid order by timestamp ASC) as t GROUP BY userid;");
+//        Cursor cursor = LitePal.findBySQL("select * from (SELECT * FROM `chatmessage` as a LEFT JOIN user as b on a.userid = b.userid order by timestamp ASC) as t GROUP BY userid;");
         while (cursor.moveToNext()) {
             String userID = cursor.getString(cursor.getColumnIndex("userid"));
             String username = cursor.getString(cursor.getColumnIndex("username"));
