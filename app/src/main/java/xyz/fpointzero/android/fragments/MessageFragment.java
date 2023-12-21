@@ -1,5 +1,6 @@
 package xyz.fpointzero.android.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,9 +17,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import xyz.fpointzero.android.R;
+import xyz.fpointzero.android.activities.MessageSearchResultActivity;
 import xyz.fpointzero.android.adapters.MessageAdapter;
 import xyz.fpointzero.android.data.Message;
-import xyz.fpointzero.android.utils.network.MessageUtil;
+import xyz.fpointzero.android.utils.data.MessageUtil;
 
 public class MessageFragment extends Fragment implements View.OnClickListener {
     private static MessageFragment instance;
@@ -103,7 +105,11 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
 
     private void search() {
         String input = etSearch.getText().toString();
-
+        Intent intent = new Intent(getContext(), MessageSearchResultActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putString("search", input);
+        intent.putExtras(bundle);
+        startActivity(intent);
     }
 
     @Override

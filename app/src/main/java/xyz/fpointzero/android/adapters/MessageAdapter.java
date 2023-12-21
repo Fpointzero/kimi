@@ -40,6 +40,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                 Context context = holder.itemView.getContext();
                 Intent intent = new Intent(context, ChatActivity.class);
                 Bundle bundle = new Bundle();
+                bundle.putInt("id", msg.getAction());
                 bundle.putString("userID", msg.getUserID());
                 intent.putExtras(bundle);
                 context.startActivity(intent);
@@ -68,5 +69,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             username = itemView.findViewById(R.id.tv_username);
             msg = itemView.findViewById(R.id.tv_msg);
         }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
     }
 }

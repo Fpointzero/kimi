@@ -1,4 +1,4 @@
-package xyz.fpointzero.android.utils.network;
+package xyz.fpointzero.android.utils.data;
 
 import android.annotation.SuppressLint;
 import android.database.Cursor;
@@ -12,9 +12,9 @@ import xyz.fpointzero.android.data.Message;
 
 public class MessageUtil {
     private static final String TAG = "MessageUtil";
-    
+
     public static void sendTextMsg() {
-        
+
     }
 
     @SuppressLint("Range")
@@ -30,6 +30,26 @@ public class MessageUtil {
             String message = cursor.getString(cursor.getColumnIndex("message"));
             String ip = cursor.getString(cursor.getColumnIndex("ip"));
             Message msg = new Message(userID, username, message, ip);
+            messageList.add(msg);
+        }
+        cursor.close();
+        return messageList;
+    }
+
+    @SuppressLint("Range")
+    public static List<Message> getAllMsgListBy(String search) {
+        List<Message> messageList = new ArrayList<Message>();
+//        Cursor cursor = LitePal.findBySQL("SELECT * from (SELECT * FROM `chatmessage` a LEFT JOIN user b ON a.userid = b.userid ORDER BY timestamp DESC) as t GROUP BY userid;");
+        Cursor cursor = LitePal.findBySQL("SELECT * from (SELECT * from `chatmessage` AS a LEFT JOIN user AS b ON a.userid = b.userid) as t WHERE username LIKE ? OR message LIKE ? ORDER BY timestamp DESC", "%" + search + "%", "%" + search + "%");
+
+        while (cursor.moveToNext()) {
+            int id = cursor.getInt(cursor.getColumnIndex("id"));
+            String userID = cursor.getString(cursor.getColumnIndex("userid"));
+            String username = cursor.getString(cursor.getColumnIndex("username"));
+            String message = cursor.getString(cursor.getColumnIndex("message"));
+            String ip = cursor.getString(cursor.getColumnIndex("ip"));
+            Message msg = new Message(userID, username, message, ip);
+            msg.setAction(id);
             messageList.add(msg);
         }
         cursor.close();

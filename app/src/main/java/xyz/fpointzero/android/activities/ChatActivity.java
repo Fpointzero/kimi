@@ -41,9 +41,6 @@ import xyz.fpointzero.android.utils.data.UserUtil;
 
 public class ChatActivity extends BaseActivity implements View.OnClickListener, View.OnFocusChangeListener {
     public static final String TAG = "ChatActivity";
-    private List<ChatMessage> chatMessageList;
-    private ChatMessageAdapter chatMessageAdapter;
-
     // core
     Thread flushThread;
     boolean isStop = false;
@@ -56,10 +53,15 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
     String userID;
     String username;
     String ip;
+    int msgId = -1;
 
     // title
     TextView tvUsername;
     TextView tvStatus;
+    
+    // recyclerView
+    List<ChatMessage> chatMessageList;
+    ChatMessageAdapter chatMessageAdapter;
     RecyclerView recyclerView;
 
     // bottom
@@ -106,8 +108,8 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
         initRecyclerViewData();
         
         recyclerView.setAdapter(chatMessageAdapter);
-        
-//        recyclerView.scrollToPosition(chatMessageList.size() - 1); // 滚动到最底部
+//        初始化滚动
+        locateId();
 
         // 初始化底栏
         input = findViewById(R.id.input);
@@ -215,6 +217,7 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
             // 初始化数据
             Bundle bundle = intent.getExtras();
             userID = bundle.getString("userID");
+            msgId = bundle.getInt("id");
             user = LitePal.where("userid = ?", userID).find(User.class).get(0);
             username = user.getUsername();
             ip = user.getIp();
@@ -324,5 +327,16 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
     protected void onDestroy() {
         super.onDestroy();
         isStop = true;
+    }
+    
+    private void locateId() {
+        if (msgId == -1)
+            return;
+        for (int i = 0; i < chatMessageList.size(); i++) {
+            if(chatMessageList.get(i).getId() == msgId) {
+                recyclerView.scrollToPosition(i);
+                return;
+            }
+        }
     }
 }

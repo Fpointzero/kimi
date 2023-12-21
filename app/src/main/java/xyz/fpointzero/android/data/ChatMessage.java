@@ -1,9 +1,13 @@
 package xyz.fpointzero.android.data;
 
+import org.litepal.annotation.Column;
 import org.litepal.crud.LitePalSupport;
 
 public class ChatMessage extends LitePalSupport {
+    @Column(unique = true)
+    int id;
     private String userid;
+    private String username;
     private boolean isSend;
     private String message;
     private long timestamp;
@@ -49,5 +53,21 @@ public class ChatMessage extends LitePalSupport {
 
     public void setUserid(String userid) {
         this.userid = userid;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

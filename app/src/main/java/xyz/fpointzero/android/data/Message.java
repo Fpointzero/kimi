@@ -11,7 +11,7 @@ import xyz.fpointzero.android.utils.crypto.RSAUtil;
 import xyz.fpointzero.android.utils.network.NetworkUtil;
 
 public class Message {
-    private int action;
+    private int action = -1; // 网络传输中的行为，活动之间的chatMessageID
     private String userID;
     private String username;
     private String ip;
