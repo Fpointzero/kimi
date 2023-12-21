@@ -32,6 +32,7 @@ import xyz.fpointzero.android.constants.DataType;
 import xyz.fpointzero.android.data.ChatMessage;
 import xyz.fpointzero.android.data.Message;
 import xyz.fpointzero.android.data.User;
+import xyz.fpointzero.android.utils.data.MessageUtil;
 import xyz.fpointzero.android.utils.data.UserUtil;
 import xyz.fpointzero.android.utils.data.SettingUtil;
 import xyz.fpointzero.android.utils.crypto.RSAUtil;
@@ -39,7 +40,7 @@ import xyz.fpointzero.android.utils.crypto.RSAUtil;
 public class MockWebServerManager {
     private static final String TAG = "MockWebServer";
     private static MockWebServerManager sInstance;
-    private static ArrayList<WeakReference<ClientWebSocketManager.WebSocketDataListener>> sWeakRefListeners;
+    private static ArrayList<WeakReference<WebSocketDataListener>> sWeakRefListeners;
     private static HashMap<String, MyWebSocket> connectWebSocketMap;
     private int port; // 端口
     private MockWebServer mMockWebServer;
@@ -147,10 +148,18 @@ public class MockWebServerManager {
         @Override
         public void onMessage(@NotNull WebSocket webSocket, @NotNull String text) {
             super.onMessage(webSocket, text);
+            // 明文传输
             try {
                 Log.d(TAG, "onMessage: " + text);
                 Message data = JSON.parseObject(text, Message.class);
                 User user = new User(data.getUserID(), data.getUsername(), data.getIp());
+
+                // 黑名单处理
+                if (UserUtil.isInBlackList(user)) {
+                    webSocket.close(ConnectType.CONNECT_REFUSE, "连接已拒绝");
+                    return;
+                }
+                
                 // 每次连接都要更新对方状态（包括名字，IP这两个）
                 try {
                     user.save();
@@ -162,17 +171,16 @@ public class MockWebServerManager {
                     Log.e(TAG, "onMessage: ", e);
                 }
 
+                // 存放对方公钥
                 if (DataType.DATA_CONNECT == data.getAction()) {
-                    if (UserUtil.isInBlackList(user)) {
-                        webSocket.close(ConnectType.CONNECT_REFUSE, "连接已拒绝");
-                        return;
-                    }
                     // 将连接加入到管理中
                     MyWebSocket tmp = new MyWebSocket(webSocket, RSAUtil.publicKeyFromString(data.getMsg()));
                     // 如果不存在则插入，存在则不变
                     connectWebSocketMap.putIfAbsent(user.getUserID(), tmp);
                     webSocket.send(Message.getConnectMessage().toString());
                 }
+                
+                // 加好友处理
                 if (data.getAction() == DataType.DATA_ADD) {
                     if (!UserUtil.isInWhiteList(user))
                         ClientWebSocketManager.getInstance().onWSDataChanged(DataType.SERVER, data);
@@ -188,10 +196,11 @@ public class MockWebServerManager {
         @Override
         public void onMessage(@NonNull WebSocket webSocket, @NonNull ByteString bytes) {
             super.onMessage(webSocket, bytes);
+            // 密文传输
             try {
                 String text;
                 // 私钥解密
-                text = new String(RSAUtil.decrypt(bytes.toByteArray(), SettingUtil.getInstance().getSetting().getPrivateKey()));
+                text = MessageUtil.msgDecrypt(bytes);
 
                 Log.d(TAG, "onMessage(Byte): " + text);
 
@@ -200,7 +209,7 @@ public class MockWebServerManager {
 
                 if (DataType.DATA_PING == data.getAction()) {
 //                    final String message = JSON.toJSONString(new Message(Type.DATA_PING, "pong response"));
-                    connectWebSocketMap.get(user.getUserID()).sendByEncrypt(new Message(DataType.DATA_PING, "ping").toString().getBytes(StandardCharsets.UTF_8));
+                    sendEncryptMsg(user.getUserID(), DataType.DATA_PING, "ping");
                     return;
                 }
 
@@ -209,9 +218,7 @@ public class MockWebServerManager {
                         new ChatMessage(user.getUserID(), true, data.getMsg(), System.currentTimeMillis()).save();
                         return;
                     }
-                    ClientWebSocketManager.getInstance().onWSDataChanged(DataType.SERVER, data);
-//                        onWSDataChanged(DataType.DATA_RECEIVE, data);
-                    return;
+                    onWSDataChanged(DataType.SERVER, data);
                 }
             } catch (Exception e) {
                 Log.e(TAG, "onMessage(Byte): " + e.getMessage(), e);
@@ -234,12 +241,8 @@ public class MockWebServerManager {
         }
     };
 
-    public void sendAll(Message msg) {
-
-    }
-
-    public void send(String userID, Message msg) {
-
+    public void sendEncryptMsg(String userid, int dataType, String msg) throws Exception {
+        connectWebSocketMap.get(userid).sendByEncrypt(new Message(dataType, msg).toString().getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -257,5 +260,13 @@ public class MockWebServerManager {
 
     public int getPort() {
         return port;
+    }
+
+    public static HashMap<String, MyWebSocket> getConnectWebSocketMap() {
+        return connectWebSocketMap;
+    }
+
+    public static void onWSDataChanged(int dataType, Message data) {
+        ClientWebSocketManager.getInstance().onWSDataChanged(dataType, data);
     }
 }

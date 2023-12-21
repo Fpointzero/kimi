@@ -158,11 +158,7 @@ public class ClientWebSocketManager {
             }
         }
     }
-
-
-    public interface WebSocketDataListener {
-        void onWebSocketData(int type, Message info);
-    }
+    
     public static HashMap<String, MyWebSocket> getClientWebSocketMap() {
         return clientWebSocketMap;
     }

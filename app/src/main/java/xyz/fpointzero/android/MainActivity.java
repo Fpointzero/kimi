@@ -12,6 +12,7 @@ import org.litepal.LitePal;
 import java.io.IOException;
 
 import xyz.fpointzero.android.data.User;
+import xyz.fpointzero.android.network.WebSocketDataListener;
 import xyz.fpointzero.android.utils.activity.ActivityUtil;
 import xyz.fpointzero.android.activities.BaseActivity;
 import xyz.fpointzero.android.constants.DataType;
@@ -22,7 +23,7 @@ import xyz.fpointzero.android.network.ClientWebSocketManager;
 import xyz.fpointzero.android.utils.activity.DialogUtil;
 import xyz.fpointzero.android.utils.data.SettingUtil;
 
-public class MainActivity extends BaseActivity implements ClientWebSocketManager.WebSocketDataListener {
+public class MainActivity extends BaseActivity implements WebSocketDataListener {
     public static final String TAG = "MainActivity";
 
     @Override

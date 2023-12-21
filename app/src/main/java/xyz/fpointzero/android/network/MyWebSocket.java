@@ -179,6 +179,13 @@ public class MyWebSocket {
             try {
                 Message data = JSON.parseObject(text, Message.class);
                 User user = new User(data.getUserID(), data.getUsername(), data.getIp());
+
+                if (DataType.DATA_ERROR == data.getAction()) {
+                    disconnect(ConnectType.CONNECT_REFUSE, "error");
+                    return;
+                }
+                
+                // 更新数据
                 try {
                     user.save();
                     ContentValues contentValues = new ContentValues();
@@ -188,6 +195,8 @@ public class MyWebSocket {
                 } catch (Exception e) {
                     Log.e(TAG, "onMessage: ", e);
                 }
+                
+                // 存取对方公钥，发送心跳包保持连接存活
                 if (DataType.DATA_CONNECT == data.getAction()) {
                     //主动发送心跳包
                     isReceivePong = true;
@@ -199,6 +208,8 @@ public class MyWebSocket {
                         webSocket.close(ConnectType.CONNECT_CLOSE, "重复的连接");
                     return;
                 }
+                
+                // 加好友处理
                 if (data.getAction() == DataType.DATA_ADD) {
                     ClientWebSocketManager.getInstance().onWSDataChanged(DataType.CLIENT, data);
                 }
@@ -226,13 +237,7 @@ public class MyWebSocket {
                         new ChatMessage(user.getUserID(), true, data.getMsg(), System.currentTimeMillis()).save();
                         return;
                     }
-                    ClientWebSocketManager.getInstance().onWSDataChanged(DataType.CLIENT, data);
-//                        onWSDataChanged(DataType.DATA_RECEIVE, data);
-                    return;
-                }
-
-                if (DataType.DATA_ERROR == data.getAction()) {
-                    webSocket.close(ConnectType.CONNECT_REFUSE, "error");
+//                    ClientWebSocketManager.getInstance().onWSDataChanged(DataType.CLIENT, data);
                     return;
                 }
             } catch (Exception e) {
