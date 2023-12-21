@@ -85,6 +85,7 @@
             android:layout_weight="1"
             android:background="@drawable/bg_edit"
             android:hint="输入发送内容"
+            android:maxLength="42"
             android:paddingHorizontal="5dp" />
 
         <!--        <Button-->
