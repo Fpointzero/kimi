@@ -295,6 +295,7 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
 
                         // 移动到最底部
                         recyclerView.scrollToPosition(0);
+                        timestamp = chatMessageList.get(0).getTimestamp();
                         isUserScroll = false;
                     }
                 } catch (Exception e) {

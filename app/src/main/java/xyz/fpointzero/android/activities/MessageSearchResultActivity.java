@@ -12,17 +12,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import xyz.fpointzero.android.R;
-import xyz.fpointzero.android.adapters.MessageAdapter;
-import xyz.fpointzero.android.data.Message;
+import xyz.fpointzero.android.adapters.MessageRecordAdapter;
+import xyz.fpointzero.android.data.MessageRecord;
 import xyz.fpointzero.android.utils.activity.ActivityUtil;
-import xyz.fpointzero.android.utils.data.MessageUtil;
 
 public class MessageSearchResultActivity extends BaseActivity{
     public static final String TAG = "MessageSearchResultActivity";
     String search;
     // recyclerView
-    List<Message> messageList;
-    MessageAdapter messageAdapter;
+    List<MessageRecord> messageList;
+    MessageRecordAdapter messageAdapter;
     RecyclerView recyclerView;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -38,10 +37,10 @@ public class MessageSearchResultActivity extends BaseActivity{
 
         // 初始化listview
         recyclerView = findViewById(R.id.recyclerview);
-        messageList = MessageUtil.getAllMsgListBy(search);
+        messageList = MessageRecord.getAllMsgRecordListBy(search);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
-        messageAdapter = new MessageAdapter(messageList);
+        messageAdapter = new MessageRecordAdapter(messageList);
         recyclerView.setAdapter(messageAdapter);
     }
     

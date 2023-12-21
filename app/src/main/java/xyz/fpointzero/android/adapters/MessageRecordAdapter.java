@@ -15,15 +15,17 @@ import java.util.List;
 
 import xyz.fpointzero.android.R;
 import xyz.fpointzero.android.activities.ChatActivity;
-import xyz.fpointzero.android.data.Message;
+import xyz.fpointzero.android.data.MessageRecord;
+import xyz.fpointzero.android.data.MessageRecord;
+import xyz.fpointzero.android.utils.data.SettingUtil;
 
-public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder>{
-    private List<Message> messageList;
-    public MessageAdapter(List<Message> messageList) {
+public class MessageRecordAdapter extends RecyclerView.Adapter<MessageRecordAdapter.ViewHolder>{
+    private List<MessageRecord> messageList;
+    public MessageRecordAdapter(List<MessageRecord> messageList) {
         this.messageList = messageList;
     }
 
-    public void setMessageList(List<Message> messageList) {
+    public void setMessageList(List<MessageRecord> messageList) {
         this.messageList = messageList;
     }
 
@@ -31,16 +33,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message, parent, false);
-        final MessageAdapter.ViewHolder holder = new MessageAdapter.ViewHolder(view);
+        final MessageRecordAdapter.ViewHolder holder = new MessageRecordAdapter.ViewHolder(view);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int position = holder.getBindingAdapterPosition();
-                Message msg = messageList.get(position);
+                MessageRecord msg = messageList.get(position);
                 Context context = holder.itemView.getContext();
                 Intent intent = new Intent(context, ChatActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putInt("id", msg.getAction());
+                bundle.putInt("id", msg.getId());
                 bundle.putString("userID", msg.getUserID());
                 intent.putExtras(bundle);
                 context.startActivity(intent);
@@ -51,9 +53,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Message msg = messageList.get(position);
+        MessageRecord msg = messageList.get(position);
         holder.username.setText(msg.getUsername());
-        holder.msg.setText(msg.getMsg());
+        if (msg.isSend())
+            holder.msg.setText(msg.getUsername() + ":" + msg.getMsg());
+        else
+            holder.msg.setText(SettingUtil.getInstance().getSetting().getUsername() + ":" + msg.getMsg());
     }
 
     @Override

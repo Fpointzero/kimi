@@ -4,9 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -45,7 +43,7 @@ public class BottomNavFragment extends Fragment implements NavigationBarView.OnI
 
         } else if (itemId == R.id.navigation_nearby) {
             title.setTitle(R.string.navigation_nearby);
-            transaction.replace(R.id.fragment_main_info, TestFragment.getInstance());
+            transaction.replace(R.id.fragment_main_info, NearbyFragment.getInstance());
 
         } else if (itemId == R.id.navigation_mine) {
             title.setTitle(R.string.navigation_mine);

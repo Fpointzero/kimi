@@ -18,16 +18,15 @@ import java.util.List;
 
 import xyz.fpointzero.android.R;
 import xyz.fpointzero.android.activities.MessageSearchResultActivity;
-import xyz.fpointzero.android.adapters.MessageAdapter;
-import xyz.fpointzero.android.data.Message;
-import xyz.fpointzero.android.utils.data.MessageUtil;
+import xyz.fpointzero.android.adapters.MessageRecordAdapter;
+import xyz.fpointzero.android.data.MessageRecord;
 
 public class MessageFragment extends Fragment implements View.OnClickListener {
     private static MessageFragment instance;
     EditText etSearch;
     Button btnSearch;
-    MessageAdapter messageAdapter;
-    List<Message> messageList;
+    MessageRecordAdapter messageAdapter;
+    List<MessageRecord> messageList;
     Thread flushThread;
     RecyclerView recyclerView;
     boolean isPause = false; // 管理线程是否暂停
@@ -43,9 +42,11 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
                     try {
                         Thread.sleep(4000);
                         requireActivity().runOnUiThread(() -> {
-                            messageList = MessageUtil.getMsgList();
-                            messageAdapter.setMessageList(messageList);
-                            messageAdapter.notifyDataSetChanged();
+                            messageList = MessageRecord.getMsgRecordList();
+                            if (messageAdapter != null) {
+                                messageAdapter.setMessageList(messageList);
+                                messageAdapter.notifyDataSetChanged();
+                            }
                         });
                         if (Thread.interrupted())
                             return;
@@ -69,10 +70,10 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_message);
 
         // 列表生成
-        messageList = MessageUtil.getMsgList();
+        messageList = MessageRecord.getMsgRecordList();
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(requireActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
-        messageAdapter = new MessageAdapter(messageList);
+        messageAdapter = new MessageRecordAdapter(messageList);
         recyclerView.setAdapter(messageAdapter);
 
         // 事件注册

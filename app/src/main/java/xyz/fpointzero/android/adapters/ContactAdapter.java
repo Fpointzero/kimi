@@ -9,19 +9,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-import xyz.fpointzero.android.MainActivity;
 import xyz.fpointzero.android.R;
 import xyz.fpointzero.android.activities.ChatActivity;
-import xyz.fpointzero.android.activities.TestActivity;
 import xyz.fpointzero.android.data.User;
-import xyz.fpointzero.android.utils.activity.ActivityUtil;
 
 public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHolder> {
     private List<User> contactList;
