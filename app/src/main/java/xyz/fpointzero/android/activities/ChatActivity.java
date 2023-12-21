@@ -288,7 +288,7 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
                     String msg = input.getText().toString();
                     if (!"".equals(msg)) {
                         new ChatMessage(userID, false, msg, System.currentTimeMillis()).save();
-                        socket.sendByEncrypt(new Message(DataType.DATA_PRIVATE, msg).toString().getBytes(StandardCharsets.UTF_8));
+                        socket.sendByEncrypt(DataType.DATA_PRIVATE, msg);
                         initRecyclerViewData();
                         chatMessageAdapter.notifyDataSetChanged();
                         input.setText("");

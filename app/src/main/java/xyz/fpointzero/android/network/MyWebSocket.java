@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.litepal.LitePal;
 
+import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -103,6 +104,10 @@ public class MyWebSocket {
             send(message);
         } else
             throw new Exception("MyWebSocket's publicKey is null!!!!");
+    }
+
+    public void sendByEncrypt(int dataType, String msg) throws Exception {
+        sendByEncrypt(new Message(DataType.DATA_PRIVATE, msg).toString().getBytes(StandardCharsets.UTF_8));
     }
 
     Handler heartHandler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
