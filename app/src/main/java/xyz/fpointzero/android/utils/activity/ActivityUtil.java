@@ -17,7 +17,9 @@ public class ActivityUtil {
         }
         return sInstance;
     }
-
+    public Activity getActivity(final String TAG) {
+        return map.get(TAG);
+    }
     public HashMap<String, Activity> getMap() {
         return map;
     }

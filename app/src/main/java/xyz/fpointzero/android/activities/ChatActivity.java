@@ -37,11 +37,12 @@ import xyz.fpointzero.android.network.ClientWebSocketManager;
 import xyz.fpointzero.android.data.Message;
 import xyz.fpointzero.android.network.MockWebServerManager;
 import xyz.fpointzero.android.network.MyWebSocket;
+import xyz.fpointzero.android.network.WebSocketDataListener;
 import xyz.fpointzero.android.utils.activity.ActivityUtil;
 import xyz.fpointzero.android.utils.activity.DialogUtil;
 import xyz.fpointzero.android.utils.data.UserUtil;
 
-public class ChatActivity extends BaseActivity implements View.OnClickListener, View.OnFocusChangeListener {
+public class ChatActivity extends BaseActivity implements View.OnClickListener, View.OnFocusChangeListener, WebSocketDataListener {
     public static final String TAG = "ChatActivity";
     // core
     Thread flushThread;
@@ -87,73 +88,12 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
         // 初始化数据
         init();
 
-        // 初始化标题
-        tvUsername = findViewById(R.id.tv_username);
-        tvStatus = findViewById(R.id.tv_status);
-        tvUsername.setText(username);
-        flushStatus();
-        if (socket == null) {
-            tvStatus.setTextColor(R.color.red);
-            tvStatus.setText("离线");
-        } else {
-            tvStatus.setTextColor(R.color.green);
-            tvStatus.setText("在线");
-        }
+        // 初始化视图
+        initView();
 
-        // 初始化listview
-        recyclerView = (RecyclerView) findViewById(R.id.activity_chat_recyclerview);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        linearLayoutManager.setReverseLayout(true);
-        recyclerView.setLayoutManager(linearLayoutManager);
+        // 注册事件监听器
+        ClientWebSocketManager.getInstance().registerWSDataListener(this);
         
-        chatMessageAdapter = new ChatMessageAdapter();
-        initRecyclerViewData();
-        
-        recyclerView.setAdapter(chatMessageAdapter);
-//        初始化滚动
-        locateId();
-
-        // 初始化底栏
-        input = findViewById(R.id.input);
-        newMsgNotice = findViewById(R.id.new_msg_notice);
-        try {
-            timestamp = chatMessageList.get(0).getTimestamp();
-        } catch (Exception e) {
-            timestamp = 0L;
-        }
-        
-
-        // 注册事件
-        /* 切换发送消息和发送图片功能 */
-        input.setOnFocusChangeListener(this);
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-//                Log.d(TAG, "onScrollStateChanged: " + newState);
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    // RecyclerView 停止滚动
-                } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-                    // 用户手指拖动 RecyclerView
-                    isUserScroll = true;
-                    if (input.isFocused()) {
-                        input.clearFocus();
-                        hideSoftKeyboard(input);
-                    }
-                } else if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
-                    // RecyclerView 正在自动滚动
-                }
-
-
-            }
-        });
-
-        uploadImg = findViewById(R.id.upload_image);
-        btnSend = findViewById(R.id.send);
-        uploadImg.setOnClickListener(this);
-        btnSend.setOnClickListener(this);
-        newMsgNotice.setOnClickListener(this);
-
         // 动态更新线程
         flushThread = new Thread(() -> {
             while (true) {
@@ -200,7 +140,76 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
         });
         flushThread.start();
     }
-    
+
+    @SuppressLint("ResourceAsColor")
+    private void initView() {
+// 初始化标题
+        tvUsername = findViewById(R.id.tv_username);
+        tvStatus = findViewById(R.id.tv_status);
+        tvUsername.setText(username);
+        flushStatus();
+        if (socket == null) {
+            tvStatus.setTextColor(R.color.red);
+            tvStatus.setText("离线");
+        } else {
+            tvStatus.setTextColor(R.color.green);
+            tvStatus.setText("在线");
+        }
+
+        // 初始化listview
+        recyclerView = (RecyclerView) findViewById(R.id.activity_chat_recyclerview);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setReverseLayout(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
+
+        chatMessageAdapter = new ChatMessageAdapter();
+        initRecyclerViewData();
+
+        recyclerView.setAdapter(chatMessageAdapter);
+//        初始化滚动
+        locateId();
+
+        // 初始化底栏
+        input = findViewById(R.id.input);
+        newMsgNotice = findViewById(R.id.new_msg_notice);
+        try {
+            timestamp = chatMessageList.get(0).getTimestamp();
+        } catch (Exception e) {
+            timestamp = 0L;
+        }
+
+
+        // 注册事件
+        /* 切换发送消息和发送图片功能 */
+        input.setOnFocusChangeListener(this);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+//                Log.d(TAG, "onScrollStateChanged: " + newState);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    // RecyclerView 停止滚动
+                } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    // 用户手指拖动 RecyclerView
+                    isUserScroll = true;
+                    if (input.isFocused()) {
+                        input.clearFocus();
+                        hideSoftKeyboard(input);
+                    }
+                } else if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
+                    // RecyclerView 正在自动滚动
+                }
+
+
+            }
+        });
+
+        uploadImg = findViewById(R.id.upload_image);
+        btnSend = findViewById(R.id.send);
+        uploadImg.setOnClickListener(this);
+        btnSend.setOnClickListener(this);
+        newMsgNotice.setOnClickListener(this);
+    }
     private void initRecyclerViewData() {
         chatMessageList = LitePal.where("userid = ?", userID).order("timestamp DESC").find(ChatMessage.class);
         chatMessageAdapter.setChatMsgList(chatMessageList);
@@ -331,12 +340,6 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        isStop = true;
-    }
-    
     private void locateId() {
         if (msgId == -1)
             return;
@@ -346,5 +349,17 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
                 return;
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        isStop = true;
+        ClientWebSocketManager.getInstance().unregisterWSDataListener(this);
+    }
+
+    @Override
+    public void onWebSocketData(int type, Message info) {
+        
     }
 }

@@ -10,8 +10,6 @@ public class DataType {
         public static final int NORMAL = 32;
         public static final int IMAGE = 33;
     }
-    public static final int SERVER = 1;
-    public static final int CLIENT = 0;
     public static final int DATA_SUCCESS = 9;
     public static final int DATA_PING = 11;
     public static final int DATA_CONNECT = 12;

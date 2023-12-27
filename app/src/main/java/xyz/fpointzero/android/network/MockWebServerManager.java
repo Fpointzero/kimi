@@ -29,6 +29,7 @@ import okhttp3.mockwebserver.RecordedRequest;
 import okio.ByteString;
 import xyz.fpointzero.android.constants.ConnectType;
 import xyz.fpointzero.android.constants.DataType;
+import xyz.fpointzero.android.constants.Role;
 import xyz.fpointzero.android.data.ChatMessage;
 import xyz.fpointzero.android.data.Message;
 import xyz.fpointzero.android.data.User;
@@ -183,7 +184,7 @@ public class MockWebServerManager {
                 // 加好友处理
                 if (data.getAction() == DataType.DATA_ADD) {
                     if (!UserUtil.isInWhiteList(user))
-                        ClientWebSocketManager.getInstance().onWSDataChanged(DataType.SERVER, data);
+                        ClientWebSocketManager.getInstance().onWSDataChanged(Role.SERVER, data);
                     else
                         webSocket.send(new Message(DataType.DATA_ADD, "success").toString());
                 }
@@ -216,9 +217,8 @@ public class MockWebServerManager {
                 if (UserUtil.isInWhiteList(user)) {
                     if (DataType.DATA_PRIVATE == data.getAction()) {
                         new ChatMessage(user.getUserID(), true, data.getMsg(), System.currentTimeMillis()).save();
-                        return;
                     }
-                    onWSDataChanged(DataType.SERVER, data);
+                    onWSDataChanged(Role.SERVER, data);
                 }
             } catch (Exception e) {
                 Log.e(TAG, "onMessage(Byte): " + e.getMessage(), e);

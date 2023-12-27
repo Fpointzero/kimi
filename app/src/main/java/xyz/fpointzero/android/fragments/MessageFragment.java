@@ -37,10 +37,10 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         flushThread = new Thread(() -> {
-            while (!Thread.interrupted()) {
+            while (true) {
                 if (!isPause) {
                     try {
-                        Thread.sleep(4000);
+                        Thread.sleep(2000);
                         requireActivity().runOnUiThread(() -> {
                             messageList = MessageRecord.getMsgRecordList();
                             if (messageAdapter != null) {
@@ -48,8 +48,6 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
                                 messageAdapter.notifyDataSetChanged();
                             }
                         });
-                        if (Thread.interrupted())
-                            return;
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }

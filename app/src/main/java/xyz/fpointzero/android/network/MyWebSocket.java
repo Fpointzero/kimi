@@ -26,6 +26,7 @@ import okhttp3.WebSocketListener;
 import okio.ByteString;
 import xyz.fpointzero.android.constants.DataType;
 import xyz.fpointzero.android.constants.ConnectType;
+import xyz.fpointzero.android.constants.Role;
 import xyz.fpointzero.android.data.ChatMessage;
 import xyz.fpointzero.android.data.Message;
 import xyz.fpointzero.android.data.User;
@@ -217,7 +218,7 @@ public class MyWebSocket {
 
                 // 加好友处理
                 if (data.getAction() == DataType.DATA_ADD) {
-                    ClientWebSocketManager.getInstance().onWSDataChanged(DataType.CLIENT, data);
+                    onWSDataChanged(Role.CLIENT, data);
                 }
             } catch (Exception e) {
                 Log.e(TAG, "onMessage:", e);
@@ -241,10 +242,8 @@ public class MyWebSocket {
                 if (UserUtil.isInWhiteList(user)) {
                     if (DataType.DATA_PRIVATE == data.getAction()) {
                         new ChatMessage(user.getUserID(), true, data.getMsg(), System.currentTimeMillis()).save();
-                        return;
                     }
-//                    ClientWebSocketManager.getInstance().onWSDataChanged(DataType.CLIENT, data);
-                    return;
+                    onWSDataChanged(Role.CLIENT, data);
                 }
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);
@@ -295,5 +294,9 @@ public class MyWebSocket {
         if (publicKey != null)
             return MD5Util.stringToMD5(RSAUtil.publicKeyToString(publicKey));
         return null;
+    }
+    
+    private static void onWSDataChanged(int type, Message data) {
+        ClientWebSocketManager.getInstance().onWSDataChanged(type, data);
     }
 }
