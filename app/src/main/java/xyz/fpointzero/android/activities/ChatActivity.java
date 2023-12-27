@@ -2,6 +2,7 @@ package xyz.fpointzero.android.activities;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -37,6 +38,7 @@ import xyz.fpointzero.android.data.Message;
 import xyz.fpointzero.android.network.MockWebServerManager;
 import xyz.fpointzero.android.network.MyWebSocket;
 import xyz.fpointzero.android.utils.activity.ActivityUtil;
+import xyz.fpointzero.android.utils.activity.DialogUtil;
 import xyz.fpointzero.android.utils.data.UserUtil;
 
 public class ChatActivity extends BaseActivity implements View.OnClickListener, View.OnFocusChangeListener {
@@ -251,11 +253,16 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
         if (itemID == android.R.id.home) {
             onBackPressed();
         } else if (itemID == R.id.option_remove) {
-            UserUtil.removeWhiteList(userID);
-            if (socket != null) {
-                socket.disconnect(ConnectType.CONNECT_CLOSE, "主动断开");
-            }
-            finish();
+            DialogUtil.showWarningDialog(this, "您确定要删除好友吗？", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    UserUtil.removeWhiteList(userID);
+                    if (socket != null) {
+                        socket.disconnect(ConnectType.CONNECT_CLOSE, "主动断开");
+                    }
+                    finish();
+                }
+            });
         } else if (itemID == R.id.option_connect) {
             flushStatus();
             if (socket == null) {

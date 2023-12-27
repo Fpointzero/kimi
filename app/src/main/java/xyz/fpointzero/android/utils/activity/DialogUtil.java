@@ -29,12 +29,12 @@ public class DialogUtil {
         builder.show();
     }
 
-    public static void showErrorDialog(Context context, Message msg) {
+    public static void showWarningDialog(Context context, String msg, DialogInterface.OnClickListener okListener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("警告");
-        builder.setMessage("用户和你已经是好友了");
-        builder.setPositiveButton("OK", null);
-//        builder.setNegativeButton("拒绝", null);
+        builder.setTitle("WARNING");
+        builder.setMessage(msg);
+        builder.setPositiveButton("确定", okListener);
+        builder.setNegativeButton("取消", null);
         builder.show();
     }
     

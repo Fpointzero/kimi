@@ -41,6 +41,27 @@ public class MyWebSocket {
     private String wsURL;
     private PublicKey publicKey; // 服务器加密通信需要
     private boolean isReceivePong;
+    Handler heartHandler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull android.os.Message msg) {
+            if (msg.what != 10) return false;
+            final String message = new Message(DataType.DATA_PING, "ping").toString();
+            if (isReceivePong) {
+                try {
+                    sendByEncrypt(message.getBytes());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                isReceivePong = false;
+                heartHandler.sendEmptyMessageDelayed(10, 20000);
+            } else {
+                //没有收到pong命令，进行重连
+                disconnect(ConnectType.CONNECT_CLOSE, "断线重连");
+            }
+            return false;
+        }
+    });
+    ;
 
     /**
      * 客户端创建webSocket
@@ -66,6 +87,7 @@ public class MyWebSocket {
         mWebSocket = webSocket;
         isReceivePong = false;
         this.publicKey = publicKey;
+
     }
 
     public void connect() {
@@ -110,27 +132,6 @@ public class MyWebSocket {
         sendByEncrypt(new Message(DataType.DATA_PRIVATE, msg).toString().getBytes(StandardCharsets.UTF_8));
     }
 
-    Handler heartHandler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
-        @Override
-        public boolean handleMessage(@NonNull android.os.Message msg) {
-            if (msg.what != 10) return false;
-            final String message = new Message(DataType.DATA_PING, "ping").toString();
-            if (isReceivePong) {
-                try {
-                    sendByEncrypt(message.getBytes());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-                isReceivePong = false;
-                heartHandler.sendEmptyMessageDelayed(10, 20000);
-            } else {
-                //没有收到pong命令，进行重连
-                disconnect(ConnectType.CONNECT_CLOSE, "断线重连");
-            }
-            return false;
-        }
-    });
-
     /**
      * 主动断开连接
      *
@@ -147,7 +148,7 @@ public class MyWebSocket {
         public void onClosed(@NotNull okhttp3.WebSocket webSocket, int code, @NotNull String reason) {
             super.onClosed(webSocket, code, reason);
             Log.e(TAG, "onClosed！");
-            //断线重连
+
             heartHandler.sendEmptyMessage(~10);
             Set<String> keys = ClientWebSocketManager.getClientWebSocketMap().keySet();
             for (String key : keys) {
@@ -189,7 +190,7 @@ public class MyWebSocket {
                     disconnect(ConnectType.CONNECT_REFUSE, "error");
                     return;
                 }
-                
+
                 // 更新数据
                 try {
                     user.save();
@@ -200,7 +201,7 @@ public class MyWebSocket {
                 } catch (Exception e) {
                     Log.e(TAG, "onMessage: ", e);
                 }
-                
+
                 // 存取对方公钥，发送心跳包保持连接存活
                 if (DataType.DATA_CONNECT == data.getAction()) {
                     //主动发送心跳包
@@ -213,7 +214,7 @@ public class MyWebSocket {
                         webSocket.close(ConnectType.CONNECT_CLOSE, "重复的连接");
                     return;
                 }
-                
+
                 // 加好友处理
                 if (data.getAction() == DataType.DATA_ADD) {
                     ClientWebSocketManager.getInstance().onWSDataChanged(DataType.CLIENT, data);

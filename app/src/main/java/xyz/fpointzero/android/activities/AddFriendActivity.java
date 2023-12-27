@@ -46,8 +46,16 @@ public class AddFriendActivity extends BaseActivity implements View.OnClickListe
             url += "/webSocket";
 
             String finalUrl = url;
-            MyWebSocket myWebSocket = ClientWebSocketManager.getInstance().createClientWS(finalUrl);
-            myWebSocket.send(new Message(DataType.DATA_ADD, "request").toString());
+            new Thread(()->{
+                MyWebSocket myWebSocket = ClientWebSocketManager.getInstance().createClientWS(finalUrl);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                myWebSocket.send(new Message(DataType.DATA_ADD, "request").toString());
+            }).start();
+            
             
         } catch (Exception e) {
             Log.e(TAG, "onClick: " + e.getMessage(), e);
