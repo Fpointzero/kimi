@@ -6,9 +6,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/whitesmoke"
-    android:orientation="vertical"
-    android:focusableInTouchMode="true"
     android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:orientation="vertical"
     tools:context=".activities.ChatActivity">
 
     <androidx.appcompat.widget.Toolbar
@@ -27,6 +27,7 @@
             android:gravity="center"
             android:orientation="vertical">
 
+
             <TextView
                 android:id="@+id/tv_username"
                 android:layout_width="wrap_content"
@@ -35,13 +36,27 @@
                 android:text="Username"
                 android:textSize="20sp" />
 
-            <TextView
-                android:id="@+id/tv_status"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:text="Status"
-                android:textSize="14sp" />
+                android:layout_weight="1">
+
+                <ImageView
+                    android:id="@+id/img_status"
+                    android:layout_width="20dp"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/offline" />
+
+                <TextView
+                    android:id="@+id/tv_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="Status"
+                    android:textColor="@color/grey"
+                    android:textSize="14sp" />
+            </LinearLayout>
+            
         </LinearLayout>
     </androidx.appcompat.widget.Toolbar>
 
@@ -59,16 +74,16 @@
         android:visibility="gone">
 
         <ImageView
-            android:src="@drawable/ic_back_24"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_back_24" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" 
+            android:layout_weight="1"
             android:gravity="center_vertical"
-            android:text="你有新的消息"/>
+            android:text="你有新的消息" />
     </LinearLayout>
 
     <LinearLayout

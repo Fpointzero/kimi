@@ -19,9 +19,12 @@ import java.util.List;
 import xyz.fpointzero.android.R;
 import xyz.fpointzero.android.activities.MessageSearchResultActivity;
 import xyz.fpointzero.android.adapters.MessageRecordAdapter;
+import xyz.fpointzero.android.data.Message;
 import xyz.fpointzero.android.data.MessageRecord;
+import xyz.fpointzero.android.network.ClientWebSocketManager;
+import xyz.fpointzero.android.network.WebSocketDataListener;
 
-public class MessageFragment extends Fragment implements View.OnClickListener {
+public class MessageFragment extends Fragment implements View.OnClickListener, WebSocketDataListener {
     private static MessageFragment instance;
     EditText etSearch;
     Button btnSearch;
@@ -36,27 +39,27 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        flushThread = new Thread(() -> {
-            while (true) {
-                if (!isPause) {
-                    try {
-                        Thread.sleep(2000);
-                        requireActivity().runOnUiThread(() -> {
-                            messageList = MessageRecord.getMsgRecordList();
-                            if (messageAdapter != null) {
-                                messageAdapter.setMessageList(messageList);
-                                messageAdapter.notifyDataSetChanged();
-                            }
-                        });
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                if (isStop)
-                    return;
-            }
-        });
-        flushThread.start();
+//        flushThread = new Thread(() -> {
+//            while (true) {
+//                if (!isPause) {
+//                    try {
+//                        Thread.sleep(2000);
+//                        requireActivity().runOnUiThread(() -> {
+//                            messageList = MessageRecord.getMsgRecordList();
+//                            if (messageAdapter != null) {
+//                                messageAdapter.setMessageList(messageList);
+//                                messageAdapter.notifyDataSetChanged();
+//                            }
+//                        });
+//                    } catch (InterruptedException e) {
+//                        throw new RuntimeException(e);
+//                    }
+//                }
+//                if (isStop)
+//                    return;
+//            }
+//        });
+//        flushThread.start();
     }
 
     @Nullable
@@ -92,6 +95,7 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
         super.onResume();
         // 动态刷新
         isPause = false;
+        ClientWebSocketManager.getInstance().registerWSDataListener(this);
     }
 
     @Override
@@ -121,5 +125,13 @@ public class MessageFragment extends Fragment implements View.OnClickListener {
     public void onDestroy() {
         super.onDestroy();
         isStop = true;
+        ClientWebSocketManager.getInstance().unregisterWSDataListener(this);
+    }
+
+    @Override
+    public void onWebSocketData(int type, Message info) {
+        messageList = MessageRecord.getMsgRecordList();
+        messageAdapter.setMessageList(messageList);
+        messageAdapter.notifyDataSetChanged();
     }
 }

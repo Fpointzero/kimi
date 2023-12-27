@@ -24,7 +24,6 @@ public class MockServerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        // TODO: 创建前台服务
     }
 
     @Override

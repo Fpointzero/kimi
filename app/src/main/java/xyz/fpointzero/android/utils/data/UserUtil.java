@@ -50,6 +50,11 @@ public class UserUtil {
         cv.put("isWhite", "0");
         return LitePal.updateAll(User.class, cv, "userid = ?", userID);
     }
+    public static int addWhiteList(String userID) {
+        ContentValues cv = new ContentValues();
+        cv.put("isWhite", "1");
+        return LitePal.updateAll(User.class, cv, "userid = ?", userID);
+    }
     
     public static User getUser(String userid) {
         return LitePal.where("userid = ?", userid).find(User.class).get(0);

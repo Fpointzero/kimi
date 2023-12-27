@@ -26,6 +26,7 @@ import xyz.fpointzero.android.network.ClientWebSocketManager;
 import xyz.fpointzero.android.utils.activity.DialogUtil;
 import xyz.fpointzero.android.utils.activity.NoticeUtil;
 import xyz.fpointzero.android.utils.data.SettingUtil;
+import xyz.fpointzero.android.utils.data.UserUtil;
 
 public class MainActivity extends BaseActivity implements WebSocketDataListener {
     public static final String TAG = "MainActivity";
@@ -55,9 +56,10 @@ public class MainActivity extends BaseActivity implements WebSocketDataListener 
         } else if (type == Role.CLIENT) {
             if (data.getAction() == DataType.DATA_ADD && data.getMsg().equals("success")) {
                 DialogUtil.showSuccessDialog(MainActivity.this, data.getUsername() + " (" + data.getUserID() + ") 已同意");
-                ContentValues contentValues = new ContentValues();
-                contentValues.put("isWhite", "1");
-                LitePal.updateAll(User.class, contentValues, "userid = ?", data.getUserID());
+//                ContentValues contentValues = new ContentValues();
+//                contentValues.put("isWhite", "1");
+//                LitePal.updateAll(User.class, contentValues, "userid = ?", data.getUserID());
+                UserUtil.addWhiteList(data.getUserID());
             }
         }
 //        if (data.getAction() == DataType.DATA_PRIVATE) {

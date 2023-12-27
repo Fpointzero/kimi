@@ -7,6 +7,13 @@
         android:id="@+id/option_disconnect"
         android:title="@string/disconnect" />
     <item
+        android:id="@+id/option_change_ip"
+        android:title="@string/change_ip" />
+    <item
         android:id="@+id/option_remove"
         android:title="@string/remove_friend" />
+    <item
+        android:id="@+id/option_add_friend"
+        android:title="@string/add_friend" />
+    
 </menu>
