@@ -135,7 +135,7 @@ public class MyWebSocket {
     }
 
     public void sendByEncrypt(int dataType, String msg) throws Exception {
-        sendByEncrypt(new Message(DataType.PRIVATE.NORMAL, msg).toString().getBytes(StandardCharsets.UTF_8));
+        sendByEncrypt(new Message(dataType, msg).toString().getBytes(StandardCharsets.UTF_8));
     }
 
     /**
