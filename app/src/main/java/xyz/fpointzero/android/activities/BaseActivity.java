@@ -19,12 +19,12 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        ActivityUtil.getInstance().setNowActivity(this);
     }
     
     @Override
     protected void onResume() {
         super.onResume();
+        ActivityUtil.getInstance().setNowActivity(this);
         if (backgroundListener == null) {
             backgroundListener = new WebSocketDataListener() {
                 @Override

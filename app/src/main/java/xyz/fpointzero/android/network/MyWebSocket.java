@@ -1,6 +1,7 @@
 package xyz.fpointzero.android.network;
 
 import android.content.ContentValues;
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -15,6 +16,7 @@ import org.litepal.LitePal;
 
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -31,6 +33,9 @@ import xyz.fpointzero.android.data.ChatMessage;
 import xyz.fpointzero.android.data.Message;
 import xyz.fpointzero.android.data.User;
 import xyz.fpointzero.android.utils.crypto.MD5Util;
+import xyz.fpointzero.android.utils.data.FileUtil;
+import xyz.fpointzero.android.utils.data.MessageUtil;
+import xyz.fpointzero.android.utils.data.SerializationUtil;
 import xyz.fpointzero.android.utils.data.SettingUtil;
 import xyz.fpointzero.android.utils.crypto.RSAUtil;
 import xyz.fpointzero.android.utils.data.UserUtil;
@@ -185,7 +190,7 @@ public class MyWebSocket {
             Log.e(TAG + ":Debug", "客户端收到消息:" + text);
             try {
                 Message data = JSON.parseObject(text, Message.class);
-                User user = new User(data.getUserID(), data.getUsername(), data.getIp());
+                
 
                 if (DataType.DATA_ERROR == data.getAction()) {
                     disconnect(ConnectType.CONNECT_REFUSE, "error");
@@ -193,14 +198,16 @@ public class MyWebSocket {
                 }
 
                 // 更新数据
-                try {
+                User user = null;
+                List<User> tmpList = LitePal.where("userid = ?", data.getUserID()).find(User.class);
+                // 不存在则创建，存在则更新用户名
+                if (tmpList.isEmpty()) {
+                    user = new User(data.getUserID(), data.getUsername(), data.getIp());
                     user.save();
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put("username", data.getUsername());
-                    contentValues.put("ip", data.getIp());
-                    LitePal.updateAll(User.class, contentValues, "userid = ?", data.getUserID());
-                } catch (Exception e) {
-                    Log.e(TAG, "onMessage: ", e);
+                } else {
+                    user = tmpList.get(0);
+                    user.setUsername(data.getUsername());
+                    user.updateAll("userid = ?", user.getUserID());
                 }
 
                 // 存取对方公钥，发送心跳包保持连接存活
@@ -220,6 +227,16 @@ public class MyWebSocket {
                 if (data.getAction() == DataType.DATA_ADD) {
                     onWSDataChanged(Role.CLIENT, data);
                 }
+
+                // 接受图片(只接受好友图片)
+                if (user.isWhite() && data.getAction() == DataType.PRIVATE.IMAGE) {
+                    Bitmap bitmap = SerializationUtil.deserializeBitmapFromBase64String(data.getMsg());
+                    ChatMessage chatMessage = new ChatMessage(user.getUserID(), true, true, null, System.currentTimeMillis());
+                    chatMessage.setMessage(data.getUserID() + "/" + chatMessage.getTimestamp() + ".png");
+                    chatMessage.save();
+                    FileUtil.createNewImg(chatMessage.getMessage(), bitmap);
+                    onWSDataChanged(Role.CLIENT, data);
+                }
             } catch (Exception e) {
                 Log.e(TAG, "onMessage:", e);
 
@@ -230,18 +247,24 @@ public class MyWebSocket {
         public void onMessage(@NotNull okhttp3.WebSocket webSocket, @NotNull ByteString bytes) {
             super.onMessage(webSocket, bytes);
             try {
-                String text = new String(RSAUtil.decrypt(bytes.toByteArray(), SettingUtil.getInstance().getSetting().getPrivateKey()));
+                //String text = new String(RSAUtil.decrypt(bytes.toByteArray(), SettingUtil.getInstance().getSetting().getPrivateKey()));
+                String text = MessageUtil.msgDecrypt(bytes);
                 Log.d(TAG, "onMessage(Byte): " + text);
 
                 Message data = JSON.parseObject(text, Message.class);
-                User user = new User(data.getUserID(), data.getUsername(), data.getIp());
+                
+                List<User> tmpList = LitePal.where("userid = ?", data.getUserID()).find(User.class);
+                if (tmpList.isEmpty())
+                    return;
+                User user = tmpList.get(0);
+                
                 if (DataType.DATA_PING == data.getAction()) {
                     isReceivePong = true;
                     return;
                 }
-                if (UserUtil.isInWhiteList(user)) {
+                if (user.isWhite()) {
                     if (DataType.DATA_PRIVATE == data.getAction()) {
-                        new ChatMessage(user.getUserID(), true, data.getMsg(), System.currentTimeMillis()).save();
+                        new ChatMessage(user.getUserID(), true, false, data.getMsg(), System.currentTimeMillis()).save();
                     }
                     onWSDataChanged(Role.CLIENT, data);
                 }

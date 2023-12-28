@@ -11,6 +11,9 @@ public class User extends LitePalSupport {
     private boolean isBlack;
     private boolean isWhite;
 
+    public User() {
+        
+    }
     public User(String userID, String ip) {
         this.userID = userID;
         username = "";

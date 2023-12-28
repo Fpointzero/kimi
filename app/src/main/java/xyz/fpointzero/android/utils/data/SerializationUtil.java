@@ -1,5 +1,7 @@
 package xyz.fpointzero.android.utils.data;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 
 import androidx.annotation.RequiresApi;
@@ -11,9 +13,23 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 public class SerializationUtil {
+    public static String serializeBitmapToBase64String(Bitmap bitmap) {
+        // 序列化位图对象
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        return Base64.getEncoder().encodeToString(byteArrayOutputStream.toByteArray());
+    }
+    
+    public static Bitmap deserializeBitmapFromBase64String(String base64Str) {
+        byte[] data = Base64.getDecoder().decode(base64Str);
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
+        return BitmapFactory.decodeStream(byteArrayInputStream);
+    }
+    
     public static String serializeToString(Object obj) {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();

@@ -51,7 +51,7 @@ public class DialogUtil {
         builder.show();
     }
 
-    public static void showEditIPDialog(Context context, String userID, String ip) {
+    public static void showEditIPDialog(Context context, User user) {
         // IPv4 格式的正则表达式
         String ipv4Pattern = "^((\\d{1,2}|1\\d{2}|2[0-4]\\d|25[0-5])\\.){3}(\\d{1,2}|1\\d{2}|2[0-4]\\d|25[0-5])$";
 
@@ -63,7 +63,7 @@ public class DialogUtil {
 
 // 创建并设置 EditText
         final EditText editText = new EditText(context);
-        editText.setText(ip);
+        editText.setText(user.getIp());
         builder.setView(editText);
 
 // 设置对话框按钮
@@ -75,7 +75,9 @@ public class DialogUtil {
                 if (inputText.matches(ipv4Pattern) || inputText.matches(ipv4WithPortPattern)) {
                     ContentValues contentValues = new ContentValues();
                     contentValues.put("ip", inputText);
-                    LitePal.updateAll(User.class, contentValues, "userid = ?", userID);
+                    LitePal.updateAll(User.class, contentValues, "userid = ?", user.getUserID());
+                    user.setIp(inputText);
+                    Toast.makeText(context, "修改成功", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(context, "格式错误", Toast.LENGTH_SHORT).show();
                 }
@@ -83,8 +85,6 @@ public class DialogUtil {
         });
         builder.setNegativeButton("取消", null);
 
-// 创建并显示 AlertDialog
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        builder.show();
     }
 }

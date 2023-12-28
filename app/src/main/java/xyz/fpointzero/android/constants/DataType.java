@@ -1,12 +1,12 @@
 package xyz.fpointzero.android.constants;
 
 public class DataType {
-    public static class Private {
+    public static class PRIVATE {
         public static final int NORMAL = 16;
         public static final int IMAGE = 17;
     }
     
-    public static class Group {
+    public static class GROUP {
         public static final int NORMAL = 32;
         public static final int IMAGE = 33;
     }

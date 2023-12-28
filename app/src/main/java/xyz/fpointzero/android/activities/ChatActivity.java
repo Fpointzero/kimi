@@ -1,10 +1,22 @@
 package xyz.fpointzero.android.activities;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Picture;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,6 +31,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -41,16 +54,20 @@ import xyz.fpointzero.android.network.MyWebSocket;
 import xyz.fpointzero.android.network.WebSocketDataListener;
 import xyz.fpointzero.android.utils.activity.ActivityUtil;
 import xyz.fpointzero.android.utils.activity.DialogUtil;
+import xyz.fpointzero.android.utils.data.FileUtil;
+import xyz.fpointzero.android.utils.data.SerializationUtil;
 import xyz.fpointzero.android.utils.data.UserUtil;
 
 public class ChatActivity extends BaseActivity implements View.OnClickListener, View.OnFocusChangeListener, WebSocketDataListener {
     public static final String TAG = "ChatActivity";
+    public static final int CHOOSE_PHOTO = 3;
     // core
     Thread flushThread;
     boolean isStop = false;
     MyWebSocket socket;
     long timestamp;
     boolean isUserScroll = false;
+    Bitmap bitmap; // 图片的bitmap
 
     // user data
     User user;
@@ -69,12 +86,13 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
     RecyclerView recyclerView;
 
     // bottom
-    ImageView uploadImg;
+    ImageView btnImageUpload;
     ImageView btnSend;
     EditText input;
     ViewGroup root;
     LinearLayout newMsgNotice;
 
+    // ======================================初始化函数======================================
     private void init() {
         Intent intent = getIntent();
         try {
@@ -88,6 +106,7 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
             finish();
         }
     }
+
     @SuppressLint("ResourceAsColor")
     private void initView() {
 // 初始化标题
@@ -95,7 +114,7 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
         tvStatus = findViewById(R.id.tv_status);
         imageStatus = findViewById(R.id.img_status);
         tvUsername.setText(user.getUsername());
-        
+
         flushStatusView();
 
         // 初始化listview
@@ -109,7 +128,7 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
 
         recyclerView.setAdapter(chatMessageAdapter);
 //        初始化滚动
-        locateId();
+        initRecyclerViewLocationByMsgId();
 
         // 初始化底栏
         input = findViewById(R.id.input);
@@ -134,9 +153,12 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
                 } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
                     // 用户手指拖动 RecyclerView
                     isUserScroll = true;
+
+                    // 取消editText聚焦并且关闭手机虚拟键盘
                     if (input.isFocused()) {
                         input.clearFocus();
-                        hideSoftKeyboard(input);
+                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
                     }
                 } else if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
                     // RecyclerView 正在自动滚动
@@ -146,12 +168,13 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
             }
         });
 
-        uploadImg = findViewById(R.id.upload_image);
+        btnImageUpload = findViewById(R.id.upload_image);
         btnSend = findViewById(R.id.send);
-        uploadImg.setOnClickListener(this);
+        btnImageUpload.setOnClickListener(this);
         btnSend.setOnClickListener(this);
         newMsgNotice.setOnClickListener(this);
     }
+
     private void initRecyclerViewData() {
         chatMessageList = LitePal.where("userid = ?", userID).order("timestamp DESC").find(ChatMessage.class);
         chatMessageAdapter.setChatMsgList(chatMessageList);
@@ -159,12 +182,17 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
 //        recyclerView.setAdapter();
     }
 
-    private void hideSoftKeyboard(View view) {
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    private void initRecyclerViewLocationByMsgId() {
+        if (msgId == -1)
+            return;
+        for (int i = 0; i < chatMessageList.size(); i++) {
+            if (chatMessageList.get(i).getId() == msgId) {
+                recyclerView.scrollToPosition(i);
+                return;
+            }
+        }
     }
-    
-    
+
     private void flushStatus() {
         // 判断是否在线 
         MyWebSocket socket1 = MockWebServerManager.getInstance().getServerWS(userID);
@@ -176,10 +204,10 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
         else
             socket = null;
     }
-    
+
     private void flushStatusView() {
         flushStatus();
-
+        user = LitePal.where("userid = ?", userID).find(User.class).get(0);
         if (socket == null) {
             int color = ContextCompat.getColor(this, R.color.grey);
             tvStatus.setTextColor(color);
@@ -193,12 +221,116 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
             imageStatus.setImageResource(R.drawable.online);
 //            menu.findItem(R.id.option_connect).setVisible(false);
         }
-        
+
         if (menu != null) {
             menu.findItem(R.id.option_connect).setVisible(socket == null);
             menu.findItem(R.id.option_disconnect).setVisible(socket != null);
             menu.findItem(R.id.option_remove).setVisible(user.isWhite());
             menu.findItem(R.id.option_add_friend).setVisible(!user.isWhite());
+        }
+    }
+
+    // ======================================功能型方法======================================
+
+    private void openAlbum() {
+        if (socket != null) {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("image/*");
+            startActivityForResult(intent, CHOOSE_PHOTO);
+        } else
+            Toast.makeText(this, "请先连接", Toast.LENGTH_SHORT).show();
+
+    }
+
+    @TargetApi(19)
+    private void handleImageOnKitKat(Intent data) {
+        String imagePath = null;
+        Uri uri = data.getData();
+        Log.d("TAG", "handleImageOnKitKat: uri is " + uri);
+        if (DocumentsContract.isDocumentUri(this, uri)) {
+            // 如果是document类型的Uri，则通过document id处理
+            String docId = DocumentsContract.getDocumentId(uri);
+            if ("com.android.providers.media.documents".equals(uri.getAuthority())) {
+                String id = docId.split(":")[1]; // 解析出数字格式的id
+                String selection = MediaStore.Images.Media._ID + "=" + id;
+                imagePath = getImagePath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, selection);
+            } else if ("com.android.providers.downloads.documents".equals(uri.getAuthority())) {
+                Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.valueOf(docId));
+                imagePath = getImagePath(contentUri, null);
+            }
+        } else if ("content".equalsIgnoreCase(uri.getScheme())) {
+            imagePath = getImagePath(uri, null); // 如果是content类型的Uri，则使用普通方式处理
+        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            imagePath = uri.getPath(); // 如果是file类型的Uri，直接获取图片路径即可
+        }
+        sendImage(imagePath); // 根据图片路径显示图片
+    }
+
+    private void handleImageBeforeKitKat(Intent data) {
+        Uri uri = data.getData();
+        String imagePath = getImagePath(uri, null);
+        sendImage(imagePath);
+    }
+
+    @SuppressLint("Range")
+    private String getImagePath(Uri uri, String selection) {
+        String path = null;
+        // 通过Uri和selection来获取真实的图片路径
+        Cursor cursor = getContentResolver().query(uri, null, selection, null, null);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+            }
+            cursor.close();
+        }
+        return path;
+    }
+
+    private void sendImage(String imagePath) {
+        if (imagePath != null) {
+            try {
+                bitmap = BitmapFactory.decodeFile(imagePath);
+                String msg = SerializationUtil.serializeBitmapToBase64String(bitmap);
+                Log.e(TAG, "sendImage: " + msg);
+                ChatMessage chatMessage = new ChatMessage(user.getUserID(), false, true, null, System.currentTimeMillis());
+                chatMessage.setMessage(userID + "/" + chatMessage.getTimestamp() + ".png");
+                chatMessage.save();
+                FileUtil.createNewImg(chatMessage.getMessage(), bitmap);
+                new Thread(() -> {
+                    socket.send(new Message(DataType.PRIVATE.IMAGE, msg).toString());
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, "发送成功", Toast.LENGTH_SHORT).show();
+                    });
+                }).start();
+                // 更新
+                initRecyclerViewData();
+                chatMessageAdapter.notifyDataSetChanged();
+            } catch (Exception e) {
+                Log.e(TAG, "sendImage: ", e);
+                Toast.makeText(this, "failed to get image", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(this, "failed to get image", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // ======================================重写的方法======================================
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case CHOOSE_PHOTO:
+                if (resultCode == RESULT_OK) {
+                    // 判断手机系统版本号
+                    if (Build.VERSION.SDK_INT >= 19) {
+                        // 4.4及以上系统使用这个方法处理图片
+                        handleImageOnKitKat(data);
+                    } else {
+                        // 4.4以下系统使用这个方法处理图片
+                        handleImageBeforeKitKat(data);
+                    }
+                }
+                break;
         }
     }
 
@@ -235,9 +367,9 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
                     String url = "ws://";
                     url += ipAndPort.contains(":") ? ipAndPort : ipAndPort + ":10808";
                     url += "/webSocket";
-                    ClientWebSocketManager.getInstance().createClientWS(String.format("ws://%s/webSocket", url));
+                    ClientWebSocketManager.getInstance().createClientWS(url);
                     runOnUiThread(() -> {
-                        Toast.makeText(ChatActivity.this, "连接", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ChatActivity.this, "连接" + user.getIp(), Toast.LENGTH_SHORT).show();
                     });
                 }).start();
             }
@@ -248,8 +380,7 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
                 Toast.makeText(ChatActivity.this, "断开连接中", Toast.LENGTH_LONG).show();
             }
         } else if (itemID == R.id.option_change_ip) {
-            DialogUtil.showEditIPDialog(this, userID, user.getIp());
-            user = LitePal.where("userid = ?", userID).find(User.class).get(0);
+            DialogUtil.showEditIPDialog(this, user);
         } else if (itemID == R.id.option_add_friend) {
             try {
                 String ipAndPort = user.getIp();
@@ -258,7 +389,7 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
                 url += "/webSocket";
 
                 String finalUrl = url;
-                new Thread(()->{
+                new Thread(() -> {
                     MyWebSocket myWebSocket = ClientWebSocketManager.getInstance().createClientWS(finalUrl);
                     try {
                         Thread.sleep(1000);
@@ -277,18 +408,32 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case 1:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    openAlbum();
+                } else {
+                    Toast.makeText(this, "You denied the permission.", Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
+    }
+
+    @Override
     public void onClick(View v) {
         int id = v.getId();
         flushStatus();
-        if (socket != null) {
-            if (id == R.id.upload_image) {
-
-            } else if (id == R.id.send) {
+        if (id == R.id.send) {
+            if (socket == null) {
+                Toast.makeText(this, "请先连接", Toast.LENGTH_SHORT).show();
+            } else {
                 Toast.makeText(this, "发送成功", Toast.LENGTH_SHORT).show();
                 try {
                     String msg = input.getText().toString();
                     if (!"".equals(msg)) {
-                        new ChatMessage(userID, false, msg, System.currentTimeMillis()).save();
+                        new ChatMessage(userID, false, false, msg, System.currentTimeMillis()).save();
                         socket.sendByEncrypt(DataType.DATA_PRIVATE, msg);
                         initRecyclerViewData();
                         chatMessageAdapter.notifyDataSetChanged();
@@ -308,6 +453,14 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
             newMsgNotice.setVisibility(View.GONE);
             recyclerView.scrollToPosition(0);
             isUserScroll = false;
+        } else if (id == R.id.upload_image) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+            } else {
+                openAlbum();
+            }
         }
     }
 
@@ -316,27 +469,15 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
         int id = v.getId();
         if (id == R.id.input) {
             if (hasFocus) {
-                uploadImg.setVisibility(View.GONE);
+                btnImageUpload.setVisibility(View.GONE);
                 btnSend.setVisibility(View.VISIBLE);
             } else {
                 btnSend.setVisibility(View.GONE);
-                uploadImg.setVisibility(View.VISIBLE);
+                btnImageUpload.setVisibility(View.VISIBLE);
             }
         }
     }
 
-    private void locateId() {
-        if (msgId == -1)
-            return;
-        for (int i = 0; i < chatMessageList.size(); i++) {
-            if(chatMessageList.get(i).getId() == msgId) {
-                recyclerView.scrollToPosition(i);
-                return;
-            }
-        }
-    }
-
-    @SuppressLint("ResourceAsColor")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         ActivityUtil.getInstance().getMap().put(TAG, this);
@@ -353,7 +494,7 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
         // 初始化视图
         initView();
 
-        // 注册事件监听器
+        // 注册网络监听事件
         ClientWebSocketManager.getInstance().registerWSDataListener(this);
 
         // 动态更新线程
@@ -395,7 +536,7 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
         });
         flushThread.start();
     }
-    
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -405,13 +546,15 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
 
     @Override
     public void onWebSocketData(int type, Message data) {
-        if (data.getAction() == DataType.DATA_PRIVATE) {
+        if (data.getUserID().equals(userID)) {
             initRecyclerViewData();
             chatMessageAdapter.notifyDataSetChanged();
-            if (isUserScroll)
-                newMsgNotice.setVisibility(View.VISIBLE);
-            else {
-                recyclerView.smoothScrollToPosition(0);
+            if (data.getAction() == DataType.DATA_PRIVATE) {
+                if (isUserScroll)
+                    newMsgNotice.setVisibility(View.VISIBLE);
+                else {
+                    recyclerView.smoothScrollToPosition(0);
+                }
             }
         }
     }

@@ -1,6 +1,7 @@
 package xyz.fpointzero.android.network;
 
 import android.content.ContentValues;
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -17,6 +18,7 @@ import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import okhttp3.Response;
@@ -33,7 +35,9 @@ import xyz.fpointzero.android.constants.Role;
 import xyz.fpointzero.android.data.ChatMessage;
 import xyz.fpointzero.android.data.Message;
 import xyz.fpointzero.android.data.User;
+import xyz.fpointzero.android.utils.data.FileUtil;
 import xyz.fpointzero.android.utils.data.MessageUtil;
+import xyz.fpointzero.android.utils.data.SerializationUtil;
 import xyz.fpointzero.android.utils.data.UserUtil;
 import xyz.fpointzero.android.utils.data.SettingUtil;
 import xyz.fpointzero.android.utils.crypto.RSAUtil;
@@ -153,40 +157,58 @@ public class MockWebServerManager {
             try {
                 Log.d(TAG, "onMessage: " + text);
                 Message data = JSON.parseObject(text, Message.class);
-                User user = new User(data.getUserID(), data.getUsername(), data.getIp());
-
+//                User user = new User(data.getUserID(), data.getUsername(), data.getIp());
+                List<User> tmpList = LitePal.where("userid = ?", data.getUserID()).find(User.class); // 临时存放用户
+                User user = null;
+                // 不存在则创建，存在则更新用户名
+                if (tmpList.isEmpty()) {
+                    user = new User(data.getUserID(), data.getUsername(), data.getIp());
+                    user.save();
+                } else {
+                    user = tmpList.get(0);
+                    user.setUsername(data.getUsername());
+                    user.updateAll("userid = ?", user.getUserID());
+                }
                 // 黑名单处理
                 if (UserUtil.isInBlackList(user)) {
                     webSocket.close(ConnectType.CONNECT_REFUSE, "连接已拒绝");
                     return;
                 }
-                
-                // 每次连接都要更新对方状态（包括名字，IP这两个）
-                try {
-                    user.save();
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put("username", data.getUsername());
-                    contentValues.put("ip", data.getIp());
-                    LitePal.updateAll(User.class, contentValues, "userid = ?", data.getUserID());
-                } catch (Exception e) {
-                    Log.e(TAG, "onMessage: ", e);
-                }
 
                 // 存放对方公钥
                 if (DataType.DATA_CONNECT == data.getAction()) {
+                    // 每次连接都要更新对方状态（包括名字，IP这两个）
+                    try {
+                        if (!user.save()) {
+                            
+                        }
+                        
+                    } catch (Exception e) {
+                        Log.e(TAG, "onMessage: ", e);
+                    }
                     // 将连接加入到管理中
                     MyWebSocket tmp = new MyWebSocket(webSocket, RSAUtil.publicKeyFromString(data.getMsg()));
                     // 如果不存在则插入，存在则不变
                     connectWebSocketMap.putIfAbsent(user.getUserID(), tmp);
                     webSocket.send(Message.getConnectMessage().toString());
                 }
-                
+
                 // 加好友处理
                 if (data.getAction() == DataType.DATA_ADD) {
                     if (!UserUtil.isInWhiteList(user))
                         ClientWebSocketManager.getInstance().onWSDataChanged(Role.SERVER, data);
                     else
                         webSocket.send(new Message(DataType.DATA_ADD, "success").toString());
+                }
+
+                // 接受图片
+                if (user.isWhite() && data.getAction() == DataType.PRIVATE.IMAGE) {
+                    Bitmap bitmap = SerializationUtil.deserializeBitmapFromBase64String(data.getMsg());
+                    ChatMessage chatMessage = new ChatMessage(user.getUserID(), true, true, null, System.currentTimeMillis());
+                    chatMessage.setMessage(data.getUserID() + "/" + chatMessage.getTimestamp() + ".png");
+                    chatMessage.save();
+                    FileUtil.createNewImg(chatMessage.getMessage(), bitmap);
+                    onWSDataChanged(Role.SERVER, data);
                 }
 
             } catch (Exception e) {
@@ -199,24 +221,27 @@ public class MockWebServerManager {
             super.onMessage(webSocket, bytes);
             // 密文传输
             try {
-                String text;
                 // 私钥解密
-                text = MessageUtil.msgDecrypt(bytes);
-
+                String text = MessageUtil.msgDecrypt(bytes);
                 Log.d(TAG, "onMessage(Byte): " + text);
-
                 Message data = JSON.parseObject(text, Message.class);
-                User user = new User(data.getUserID(), data.getUsername(), data.getIp());
-
+                
+                // 用户
+                List<User> tmpList = LitePal.where("userid = ?", data.getUserID()).find(User.class);
+                if (tmpList.isEmpty())
+                    return;
+                User user = tmpList.get(0);
+                
+                
                 if (DataType.DATA_PING == data.getAction()) {
 //                    final String message = JSON.toJSONString(new Message(Type.DATA_PING, "pong response"));
-                    sendEncryptMsg(user.getUserID(), DataType.DATA_PING, "ping");
+                    sendEncryptMsg(data.getUserID(), DataType.DATA_PING, "ping");
                     return;
                 }
 
-                if (UserUtil.isInWhiteList(user)) {
+                if (user.isWhite()) {
                     if (DataType.DATA_PRIVATE == data.getAction()) {
-                        new ChatMessage(user.getUserID(), true, data.getMsg(), System.currentTimeMillis()).save();
+                        new ChatMessage(user.getUserID(), true, false, data.getMsg(), System.currentTimeMillis()).save();
                     }
                     onWSDataChanged(Role.SERVER, data);
                 }

@@ -1,5 +1,7 @@
 package xyz.fpointzero.android.adapters;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,17 +12,22 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.File;
 import java.util.List;
 
 import xyz.fpointzero.android.R;
 import xyz.fpointzero.android.data.ChatMessage;
 import xyz.fpointzero.android.utils.DateUtil;
+import xyz.fpointzero.android.utils.data.FileUtil;
+import xyz.fpointzero.android.utils.data.SerializationUtil;
 import xyz.fpointzero.android.utils.data.SettingUtil;
 
 public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.ViewHolder> {
     private List<ChatMessage> chatMsgList;
-    
-    public ChatMessageAdapter(){}
+
+    public ChatMessageAdapter() {
+    }
+
     public ChatMessageAdapter(List<ChatMessage> list) {
         chatMsgList = list;
     }
@@ -41,20 +48,46 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ChatMessage chatMsg = chatMsgList.get(position);
-        // TODO: 处理图像内容 还有处理
+        String pathname = "";
+        Bitmap bitmap = null;
+        if (chatMsg.isImg()) {
+            // 加载图片
+            pathname = FileUtil.getInternalStorageDir() + File.separator + chatMsg.getMessage();
+            bitmap = BitmapFactory.decodeFile(pathname);
+        }
+        
         if (!chatMsg.isSend()) {
             holder.rightTime.setText(DateUtil.toYMD(chatMsg.getTimestamp()));
-            holder.rightContent.setText(chatMsg.getMessage());
-            
-            holder.rightImg.setVisibility(View.GONE);
             holder.leftMsg.setVisibility(View.GONE);
+            
+            if (chatMsg.isImg()) {
+                // 加载图片
+                holder.rightImg.setImageBitmap(bitmap);
+                holder.rightImg.setVisibility(View.VISIBLE);
+                holder.rightContent.setVisibility(View.GONE);
+                
+            } else {
+                holder.rightContent.setText(chatMsg.getMessage());
+                holder.rightContent.setVisibility(View.VISIBLE);
+                holder.rightImg.setVisibility(View.GONE);
+            }
             holder.rightMsg.setVisibility(View.VISIBLE);
+            
         } else {
             holder.leftTime.setText(DateUtil.toYMD(chatMsg.getTimestamp()));
-            holder.leftContent.setText(chatMsg.getMessage());
-
-            holder.leftImg.setVisibility(View.GONE);
             holder.rightMsg.setVisibility(View.GONE);
+            
+            if (chatMsg.isImg()) {
+                holder.leftImg.setImageBitmap(bitmap);
+                holder.leftImg.setVisibility(View.VISIBLE);
+                holder.leftContent.setVisibility(View.GONE);
+                
+            } else {
+                holder.leftContent.setText(chatMsg.getMessage());
+                holder.leftContent.setVisibility(View.VISIBLE);
+                holder.leftImg.setVisibility(View.GONE);
+            }
+            
             holder.leftMsg.setVisibility(View.VISIBLE);
         }
     }
@@ -98,6 +131,7 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
 
     /**
      * 解决复用导致长度不一致，因为消息是反着的recyclerView所以是getItemCount() - position - 1否则是position即可
+     *
      * @param position position to query
      * @return
      */

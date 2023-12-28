@@ -27,8 +27,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            app:cardCornerRadius="10dp"
-            android:backgroundTint="#FFFFFF">
+            android:backgroundTint="#99B8F6"
+            app:cardCornerRadius="10dp">
 
             <TextView
                 android:id="@+id/left_content"
@@ -43,8 +43,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="true"
+                android:background="#FFFFFF"
                 android:maxWidth="200dp"
-                android:scaleType="fitXY" />
+                android:scaleType="fitXY"
+                android:src="@drawable/ic_image_error" />
         </androidx.cardview.widget.CardView>
 
 
@@ -80,8 +82,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                app:cardCornerRadius="10dp"
-                android:backgroundTint="@color/salmon">
+                android:backgroundTint="@color/salmon"
+                app:cardCornerRadius="10dp">
 
 
                 <ImageView
@@ -89,8 +91,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
+                    android:background="#FFFFFF"
                     android:maxWidth="200dp"
-                    android:scaleType="fitXY" />
+                    android:scaleType="fitXY"
+                    android:src="@drawable/ic_image_error" />
 
                 <TextView
                     android:id="@+id/right_content"

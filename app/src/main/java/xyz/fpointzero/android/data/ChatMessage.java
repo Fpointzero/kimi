@@ -3,12 +3,15 @@ package xyz.fpointzero.android.data;
 import org.litepal.annotation.Column;
 import org.litepal.crud.LitePalSupport;
 
+/**
+ * 聊天消息类
+ */
 public class ChatMessage extends LitePalSupport {
     @Column(unique = true)
     int id;
     private String userid;
-    private String username;
     private boolean isSend;
+    private boolean isImg;
     private String message;
     private long timestamp;
 
@@ -16,9 +19,10 @@ public class ChatMessage extends LitePalSupport {
         // 默认构造方法
     }
 
-    public ChatMessage(String userid, boolean isSend, String message, long timestamp) {
+    public ChatMessage(String userid, boolean isSend, boolean isImg, String message, long timestamp) {
         this.userid = userid;
         this.isSend = isSend;
+        this.isImg = isImg;
         this.message = message;
         this.timestamp = timestamp;
     }
@@ -47,6 +51,10 @@ public class ChatMessage extends LitePalSupport {
         return isSend;
     }
 
+    public boolean isImg() {
+        return isImg;
+    }
+
     public void setSend(boolean send) {
         isSend = send;
     }
@@ -62,12 +70,5 @@ public class ChatMessage extends LitePalSupport {
     public void setId(int id) {
         this.id = id;
     }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    
 }
