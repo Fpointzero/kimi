@@ -170,7 +170,7 @@ public class MockWebServerManager {
                     user.updateAll("userid = ?", user.getUserID());
                 }
                 // 黑名单处理
-                if (UserUtil.isInBlackList(user)) {
+                if (user.isBlack()) {
                     webSocket.close(ConnectType.CONNECT_REFUSE, "连接已拒绝");
                     return;
                 }
@@ -195,7 +195,7 @@ public class MockWebServerManager {
 
                 // 加好友处理
                 if (data.getAction() == DataType.DATA_ADD) {
-                    if (!UserUtil.isInWhiteList(user))
+                    if (!user.isWhite())
                         ClientWebSocketManager.getInstance().onWSDataChanged(Role.SERVER, data);
                     else
                         webSocket.send(new Message(DataType.DATA_ADD, "success").toString());
