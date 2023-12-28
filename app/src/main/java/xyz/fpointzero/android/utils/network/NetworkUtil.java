@@ -42,7 +42,11 @@ public class NetworkUtil {
         return ipAddress;
     }
 
-    // 获取IP地址（适用于Android 10及以上和Android 10以下的设备）
+    /**
+     * 获取IP地址（适用于Android 10及以上和Android 10以下的设备）
+     * @param isAndroid10OrAbove
+     * @return
+     */
     private static String getIPAddress(boolean isAndroid10OrAbove) {
         String ipAddress = "";
         try {
@@ -71,7 +75,10 @@ public class NetworkUtil {
         return ipAddress;
     }
 
-    // 获取设备的IPv4地址
+    /**
+     * 获取IPv4地址
+     * @return ipv4地址
+     */
     public static String getDeviceIPv4Address() {
         Context context = ActivityUtil.getInstance().getMap().get(MainActivity.TAG);
         String ipv4Address = "";
@@ -127,7 +134,11 @@ public class NetworkUtil {
         return ipv4Address;
     }
 
-    // 判断字符串是否为IPv4地址
+    /**
+     * 判断是否IPV4地址
+     * @param address
+     * @return
+     */
     private static boolean isIPv4Address(String address) {
         String[] parts = address.split("\\.");
         if (parts.length != 4) {

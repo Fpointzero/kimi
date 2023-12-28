@@ -47,6 +47,11 @@ public class MainActivity extends BaseActivity implements WebSocketDataListener 
         transaction.commit();
     }
 
+    /**
+     * 处理接收到数据
+     * @param type
+     * @param data
+     */
     @Override
     public void onWebSocketData(int type, Message data) {
         Log.d(TAG, "onWebSocketData: Type: " + type + " Receive data: " + data.toString());
@@ -84,7 +89,9 @@ public class MainActivity extends BaseActivity implements WebSocketDataListener 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // 回收资源，关闭监听器注册
         ClientWebSocketManager.getInstance().unregisterWSDataListener(this);
+        // 保存配置文件
         SettingUtil.getInstance().saveSetting(MainActivity.this);
         stopService(new Intent(this, MockServerService.class));
         try {
