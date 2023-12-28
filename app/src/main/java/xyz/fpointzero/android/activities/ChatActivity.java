@@ -434,7 +434,7 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
                     String msg = input.getText().toString();
                     if (!"".equals(msg)) {
                         new ChatMessage(userID, false, false, msg, System.currentTimeMillis()).save();
-                        socket.sendByEncrypt(DataType.DATA_PRIVATE, msg);
+                        socket.sendByEncrypt(DataType.PRIVATE.NORMAL, msg);
                         initRecyclerViewData();
                         chatMessageAdapter.notifyDataSetChanged();
                         input.setText("");
@@ -547,9 +547,13 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener, 
     @Override
     public void onWebSocketData(int type, Message data) {
         if (data.getUserID().equals(userID)) {
+            if (data.getAction() == DataType.PRIVATE.CHECK && data.getMsg().equals(DataType.ERROR)) {
+                Toast.makeText(this, "您不是对方的好友", Toast.LENGTH_SHORT).show();
+                return;
+            }
             initRecyclerViewData();
             chatMessageAdapter.notifyDataSetChanged();
-            if (data.getAction() == DataType.DATA_PRIVATE) {
+            if (data.getAction() == DataType.PRIVATE.NORMAL || data.getAction() == DataType.PRIVATE.IMAGE) {
                 if (isUserScroll)
                     newMsgNotice.setVisibility(View.VISIBLE);
                 else {

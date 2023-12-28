@@ -25,34 +25,29 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         ActivityUtil.getInstance().setNowActivity(this);
-        if (backgroundListener == null) {
-            backgroundListener = new WebSocketDataListener() {
-                @Override
-                public void onWebSocketData(int type, Message data) {
-                    if (data.getAction() == DataType.DATA_PRIVATE) {
-                        NoticeUtil.newMessageNotice(ActivityUtil.getInstance().getActivity(MainActivity.TAG), data.getUsername(), data.getMsg(), data.getUserID());
-                    }
-                }
-            };
-        }
+        initListener();
         ClientWebSocketManager.getInstance().unregisterWSDataListener(backgroundListener);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        initListener();
+        ClientWebSocketManager.getInstance().registerWSDataListener(backgroundListener);
+    }
+
+    private static void initListener() {
         if (backgroundListener == null) {
             backgroundListener = new WebSocketDataListener() {
                 @Override
                 public void onWebSocketData(int type, Message data) {
-                    if (data.getAction() == DataType.DATA_PRIVATE) {
+                    if (data.getAction() == DataType.PRIVATE.NORMAL) {
                         NoticeUtil.newMessageNotice(ActivityUtil.getInstance().getActivity(MainActivity.TAG), data.getUsername(), data.getMsg(), data.getUserID());
+                    } else if (data.getAction() == DataType.PRIVATE.IMAGE) {
+                        NoticeUtil.newMessageNotice(ActivityUtil.getInstance().getActivity(MainActivity.TAG), data.getUsername(), "[图片]", data.getUserID());
                     }
                 }
             };
         }
-        ClientWebSocketManager.getInstance().registerWSDataListener(backgroundListener);
     }
-
-
 }

@@ -28,6 +28,8 @@ public class NoticeUtil {
         notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             channel = new NotificationChannel(userID, userID, NotificationManager.IMPORTANCE_HIGH);
+            channel.setVibrationPattern(new long[]{0, 1000, 500, 1000});
+            channel.enableVibration(true);
             notificationManager.createNotificationChannel(channel);
         }
         NotificationCompat.Builder builder;
@@ -36,12 +38,11 @@ public class NoticeUtil {
         } else {
             builder = new NotificationCompat.Builder(context, userID);
         }
-        builder.setDefaults(NotificationCompat.DEFAULT_ALL)
-                .setSmallIcon(R.drawable.ic_user_24)
+        builder.setSmallIcon(R.drawable.ic_user_24)
                 .setWhen(System.currentTimeMillis())
                 .setContentTitle(title)
                 .setContentText(text)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setContentIntent(pi)
                 .setVibrate(new long[]{0,1000,1000,1000})
                 .setAutoCancel(true);

@@ -180,9 +180,9 @@ public class MockWebServerManager {
                     // 每次连接都要更新对方状态（包括名字，IP这两个）
                     try {
                         if (!user.save()) {
-                            
+
                         }
-                        
+
                     } catch (Exception e) {
                         Log.e(TAG, "onMessage: ", e);
                     }
@@ -225,26 +225,27 @@ public class MockWebServerManager {
                 String text = MessageUtil.msgDecrypt(bytes);
                 Log.d(TAG, "onMessage(Byte): " + text);
                 Message data = JSON.parseObject(text, Message.class);
-                
+
                 // 用户
                 List<User> tmpList = LitePal.where("userid = ?", data.getUserID()).find(User.class);
                 if (tmpList.isEmpty())
                     return;
                 User user = tmpList.get(0);
-                
-                
+
+
                 if (DataType.DATA_PING == data.getAction()) {
 //                    final String message = JSON.toJSONString(new Message(Type.DATA_PING, "pong response"));
                     sendEncryptMsg(data.getUserID(), DataType.DATA_PING, "ping");
                     return;
                 }
-
-                if (user.isWhite()) {
-                    if (DataType.DATA_PRIVATE == data.getAction()) {
+                
+                if (DataType.PRIVATE.NORMAL == data.getAction()) {
+                    if (user.isWhite())
                         new ChatMessage(user.getUserID(), true, false, data.getMsg(), System.currentTimeMillis()).save();
-                    }
-                    onWSDataChanged(Role.SERVER, data);
+                    else 
+                        sendEncryptMsg(data.getUserID(), DataType.PRIVATE.CHECK, DataType.ERROR);
                 }
+                onWSDataChanged(Role.SERVER, data);
             } catch (Exception e) {
                 Log.e(TAG, "onMessage(Byte): " + e.getMessage(), e);
             }

@@ -135,7 +135,7 @@ public class MyWebSocket {
     }
 
     public void sendByEncrypt(int dataType, String msg) throws Exception {
-        sendByEncrypt(new Message(DataType.DATA_PRIVATE, msg).toString().getBytes(StandardCharsets.UTF_8));
+        sendByEncrypt(new Message(DataType.PRIVATE.NORMAL, msg).toString().getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -145,8 +145,10 @@ public class MyWebSocket {
      * @param reason
      */
     public void disconnect(int code, String reason) {
-        if (mWebSocket != null)
+        if (mWebSocket != null) {
+            
             mWebSocket.close(code, reason);
+        }
     }
 
     class WsListener extends WebSocketListener {
@@ -190,7 +192,7 @@ public class MyWebSocket {
             Log.e(TAG + ":Debug", "客户端收到消息:" + text);
             try {
                 Message data = JSON.parseObject(text, Message.class);
-                
+
 
                 if (DataType.DATA_ERROR == data.getAction()) {
                     disconnect(ConnectType.CONNECT_REFUSE, "error");
@@ -252,22 +254,25 @@ public class MyWebSocket {
                 Log.d(TAG, "onMessage(Byte): " + text);
 
                 Message data = JSON.parseObject(text, Message.class);
-                
+
                 List<User> tmpList = LitePal.where("userid = ?", data.getUserID()).find(User.class);
                 if (tmpList.isEmpty())
                     return;
                 User user = tmpList.get(0);
-                
+
                 if (DataType.DATA_PING == data.getAction()) {
                     isReceivePong = true;
                     return;
                 }
-                if (user.isWhite()) {
-                    if (DataType.DATA_PRIVATE == data.getAction()) {
+
+                if (DataType.PRIVATE.NORMAL == data.getAction()) {
+                    if (user.isWhite())
                         new ChatMessage(user.getUserID(), true, false, data.getMsg(), System.currentTimeMillis()).save();
-                    }
-                    onWSDataChanged(Role.CLIENT, data);
+                    else
+                        sendByEncrypt(DataType.PRIVATE.CHECK, DataType.ERROR);
                 }
+                
+                onWSDataChanged(Role.CLIENT, data);
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);
             }
@@ -318,7 +323,7 @@ public class MyWebSocket {
             return MD5Util.stringToMD5(RSAUtil.publicKeyToString(publicKey));
         return null;
     }
-    
+
     private static void onWSDataChanged(int type, Message data) {
         ClientWebSocketManager.getInstance().onWSDataChanged(type, data);
     }
