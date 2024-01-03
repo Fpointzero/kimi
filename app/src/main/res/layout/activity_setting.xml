@@ -9,7 +9,17 @@
         android:id="@+id/title_bar"
         android:layout_width="match_parent"
         app:contentInsetStart="0dp"
-        android:layout_height="wrap_content" />
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp" />
+
+<!--    android:id="@+id/title_bar"-->
+<!--    android:layout_width="match_parent"-->
+<!--    app:titleValue="@string/setting"-->
+<!--    android:layout_height="?attr/actionBarSize"-->
+<!--    android:background="?attr/colorPrimary"-->
+<!--    android:elevation="4dp"-->
+<!--    app:contentInsetStart="0dp"-->
 
     <View
         android:layout_width="match_parent"

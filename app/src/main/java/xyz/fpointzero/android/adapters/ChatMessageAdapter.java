@@ -22,6 +22,9 @@ import xyz.fpointzero.android.utils.data.FileUtil;
 import xyz.fpointzero.android.utils.data.SerializationUtil;
 import xyz.fpointzero.android.utils.data.SettingUtil;
 
+/**
+ * 聊天信息适配器
+ */
 public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.ViewHolder> {
     private List<ChatMessage> chatMsgList;
 

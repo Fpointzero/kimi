@@ -8,8 +8,10 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 
 import xyz.fpointzero.android.R;
+import xyz.fpointzero.android.layout.TitleChildBar;
 import xyz.fpointzero.android.utils.activity.ActivityUtil;
 import xyz.fpointzero.android.utils.data.SettingUtil;
 
@@ -23,6 +25,11 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
         ActivityUtil.getInstance().getMap().put(TAG, this);
+        
+        TitleChildBar toolbar = findViewById(R.id.title_bar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        toolbar.setTitle("设置");
 
         username = findViewById(R.id.edText_username);
         port = findViewById(R.id.edText_port);

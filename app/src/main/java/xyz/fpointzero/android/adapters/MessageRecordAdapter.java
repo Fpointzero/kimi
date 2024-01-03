@@ -18,6 +18,9 @@ import xyz.fpointzero.android.activities.ChatActivity;
 import xyz.fpointzero.android.data.MessageRecord;
 import xyz.fpointzero.android.utils.data.SettingUtil;
 
+/**
+ * 消息记录适配器
+ */
 public class MessageRecordAdapter extends RecyclerView.Adapter<MessageRecordAdapter.ViewHolder> {
     private List<MessageRecord> messageList;
 

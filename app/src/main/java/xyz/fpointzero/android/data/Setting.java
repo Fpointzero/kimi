@@ -8,6 +8,9 @@ import java.security.PublicKey;
 import xyz.fpointzero.android.utils.crypto.MD5Util;
 import xyz.fpointzero.android.utils.crypto.RSAUtil;
 
+/**
+ * 设置
+ */
 public class Setting implements Serializable {
     private static final String ALG = "RSA";
     private String userID;

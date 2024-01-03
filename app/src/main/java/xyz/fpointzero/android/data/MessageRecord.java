@@ -78,6 +78,10 @@ public class MessageRecord {
         return isImg;
     }
 
+    /**
+     * 获取类似QQ那种消息列表
+     * @return
+     */
     @SuppressLint("Range")
     public static List<MessageRecord> getMsgRecordList() {
         List<MessageRecord> messageList;
@@ -90,6 +94,11 @@ public class MessageRecord {
         return messageList;
     }
 
+    /**
+     * 根据搜索返回消息列表
+     * @param search
+     * @return
+     */
     @SuppressLint("Range")
     public static List<MessageRecord> getAllMsgRecordListBy(String search) {
         List<MessageRecord> messageList;

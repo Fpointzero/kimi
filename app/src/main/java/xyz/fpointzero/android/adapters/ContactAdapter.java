@@ -19,6 +19,9 @@ import xyz.fpointzero.android.R;
 import xyz.fpointzero.android.activities.ChatActivity;
 import xyz.fpointzero.android.data.User;
 
+/**
+ * 联系人适配器
+ */
 public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHolder> {
     private List<User> contactList;
     

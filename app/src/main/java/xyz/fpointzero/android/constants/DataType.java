@@ -1,5 +1,8 @@
 package xyz.fpointzero.android.constants;
 
+/**
+ * 消息类型
+ */
 public class DataType {
     public static final String SUCCESS = "SUCCESS";
     public static final String ERROR = "ERROR";
