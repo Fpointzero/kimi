@@ -46,7 +46,7 @@ public class MyWebSocket {
     private WebSocket mWebSocket;
     private String wsURL;
     private PublicKey publicKey; // 服务器加密通信需要
-    private boolean isReceivePong;
+    private boolean isReceivePong; // 判断是否接受了对方发送的pong
     Handler heartHandler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull android.os.Message msg) {
